@@ -1,5 +1,6 @@
 package com.agrisense.backend.service;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.agrisense.backend.dto.FarmerRegisterRequest;
@@ -12,6 +13,10 @@ import com.agrisense.backend.repository.FarmerRepository;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final FarmerRepository farmerRepository;
+
+    // BCrypt hashes passwords before they are stored.
+    private final BCryptPasswordEncoder passwordEncoder =
+            new BCryptPasswordEncoder();
 
     public AuthenticationServiceImpl(FarmerRepository farmerRepository) {
         this.farmerRepository = farmerRepository;
@@ -35,7 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         farmer.setName(request.getName());
         farmer.setEmail(request.getEmail());
-        farmer.setPassword(request.getPassword());
+        farmer.setPassword(passwordEncoder.encode(request.getPassword()));
         farmer.setPhone(request.getPhone());
         farmer.setLocation(request.getLocation());
 
@@ -69,7 +74,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             );
         }
 
-        if (!farmer.getPassword().equals(request.getPassword())) {
+        if (!passwordMatches(farmer, request.getPassword())) {
             return new LoginResponse(
                     false,
                     "Invalid email or password",
@@ -88,5 +93,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 farmer.getEmail(),
                 "FARMER"
         );
+    }
+
+    /*
+     * Accounts created before hashing was added still hold a
+     * plain-text password. Accept it once, then replace it
+     * with a BCrypt hash so it is never stored in plain text again.
+     */
+    private boolean passwordMatches(Farmer farmer, String rawPassword) {
+
+        String stored = farmer.getPassword();
+
+        if (stored == null || rawPassword == null) {
+            return false;
+        }
+
+        if (stored.matches("^\\$2[aby]\\$\\d{2}\\$.{53}$")) {
+            return passwordEncoder.matches(rawPassword, stored);
+        }
+
+        if (stored.equals(rawPassword)) {
+            farmer.setPassword(passwordEncoder.encode(rawPassword));
+            farmerRepository.save(farmer);
+            return true;
+        }
+
+        return false;
     }
 }
