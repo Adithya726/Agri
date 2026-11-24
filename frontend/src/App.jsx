@@ -11,6 +11,7 @@ import FarmState from "./pages/FarmState/FarmState";
 import Predictions from "./pages/Predictions/Predictions";
 import ContextInterpretation from "./pages/ContextInterpretation/ContextInterpretation";
 import AgriculturalActions from "./pages/AgriculturalActions/AgriculturalActions";
+import ActionPlan from "./pages/ActionPlan/ActionPlan";
 
 function ProtectedRoute({ children }) {
 
@@ -177,6 +178,14 @@ function App() {
 />
 
 
+<Route
+    path="/action-plan"
+    element={
+        <ProtectedRoute>
+            <ActionPlan />
+        </ProtectedRoute>
+    }
+/>
             {/* =========================
                 Unknown Routes
             ========================= */}
