@@ -8,9 +8,12 @@ import com.agrisense.backend.dto.LoginRequest;
 import com.agrisense.backend.dto.LoginResponse;
 import com.agrisense.backend.model.Farmer;
 import com.agrisense.backend.repository.FarmerRepository;
+import com.agrisense.backend.security.JwtService;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
+
+    private static final String DEFAULT_ROLE = "FARMER";
 
     private final FarmerRepository farmerRepository;
 
@@ -18,8 +21,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final BCryptPasswordEncoder passwordEncoder =
             new BCryptPasswordEncoder();
 
-    public AuthenticationServiceImpl(FarmerRepository farmerRepository) {
+    private final JwtService jwtService;
+
+    public AuthenticationServiceImpl(FarmerRepository farmerRepository,
+                                     JwtService jwtService) {
         this.farmerRepository = farmerRepository;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -43,16 +50,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         farmer.setPassword(passwordEncoder.encode(request.getPassword()));
         farmer.setPhone(request.getPhone());
         farmer.setLocation(request.getLocation());
+        farmer.setRole(DEFAULT_ROLE);
 
         Farmer savedFarmer = farmerRepository.save(farmer);
 
-        return new LoginResponse(
-                true,
+        return successResponse(
                 "Farmer registered successfully",
-                savedFarmer.getId(),
-                savedFarmer.getName(),
-                savedFarmer.getEmail(),
-                "FARMER"
+                savedFarmer
         );
     }
 
@@ -85,14 +89,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             );
         }
 
-        return new LoginResponse(
+        return successResponse("Login successful", farmer);
+    }
+
+    private LoginResponse successResponse(String message, Farmer farmer) {
+
+        String role = farmer.getRole() != null
+                ? farmer.getRole()
+                : DEFAULT_ROLE;
+
+        LoginResponse response = new LoginResponse(
                 true,
-                "Login successful",
+                message,
                 farmer.getId(),
                 farmer.getName(),
                 farmer.getEmail(),
-                "FARMER"
+                role
         );
+
+        response.setToken(
+                jwtService.generateToken(farmer.getId(), farmer.getEmail(), role)
+        );
+
+        return response;
     }
 
     /*

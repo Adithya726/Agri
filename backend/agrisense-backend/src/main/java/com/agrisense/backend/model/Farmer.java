@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 @Table(name = "farmers")
 public class Farmer {
@@ -29,6 +31,11 @@ public class Farmer {
 
     @Column
     private String location;
+
+    // Access role; existing rows get FARMER through the column default
+    @Column(nullable = false, length = 20)
+    @ColumnDefault("'FARMER'")
+    private String role = "FARMER";
 
     // Default constructor required by JPA
     public Farmer() {
@@ -92,5 +99,13 @@ public class Farmer {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

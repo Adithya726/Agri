@@ -81,7 +81,8 @@ export const AuthProvider = ({ children }) => {
             email: response.email,
             role: response.role,
             phone: response.phone || "",
-            location: response.location || ""
+            location: response.location || "",
+            token: response.token
         };
 
 
