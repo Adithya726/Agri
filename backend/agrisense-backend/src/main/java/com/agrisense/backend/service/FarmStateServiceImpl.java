@@ -2,11 +2,16 @@ package com.agrisense.backend.service;
 
 import java.util.List;
 
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.agrisense.backend.model.Farm;
 import com.agrisense.backend.model.FarmState;
+import com.agrisense.backend.model.FarmStateReading;
 import com.agrisense.backend.repository.FarmRepository;
+import com.agrisense.backend.repository.FarmStateReadingRepository;
 import com.agrisense.backend.repository.FarmStateRepository;
 import com.agrisense.backend.validation.FarmStateValidator;
 
@@ -17,12 +22,34 @@ public class FarmStateServiceImpl implements FarmStateService {
 
     private final FarmRepository farmRepository;
 
+    // Keeps a timestamped copy of every saved state for monitoring.
+    private final FarmStateReadingRepository readingRepository;
+
     public FarmStateServiceImpl(
             FarmStateRepository farmStateRepository,
             FarmRepository farmRepository) {
 
+        this(farmStateRepository, farmRepository, null);
+    }
+
+    @Autowired
+    public FarmStateServiceImpl(
+            FarmStateRepository farmStateRepository,
+            FarmRepository farmRepository,
+            FarmStateReadingRepository readingRepository) {
+
         this.farmStateRepository = farmStateRepository;
         this.farmRepository = farmRepository;
+        this.readingRepository = readingRepository;
+    }
+
+    private FarmState recorded(FarmState saved) {
+
+        if (readingRepository != null && saved != null && saved.getFarm() != null) {
+            readingRepository.save(FarmStateReading.of(saved, LocalDateTime.now()));
+        }
+
+        return saved;
     }
 
     @Override
@@ -65,12 +92,12 @@ public class FarmStateServiceImpl implements FarmStateService {
             existingState.setCropHealth(farmState.getCropHealth());
             existingState.setDiseaseStatus(farmState.getDiseaseStatus());
 
-            return farmStateRepository.save(existingState);
+            return recorded(farmStateRepository.save(existingState));
         }
 
         farmState.setFarm(farm);
 
-        return farmStateRepository.save(farmState);
+        return recorded(farmStateRepository.save(farmState));
     }
 
     @Override
@@ -145,7 +172,7 @@ public class FarmStateServiceImpl implements FarmStateService {
         existingState.setCropHealth(farmState.getCropHealth());
         existingState.setDiseaseStatus(farmState.getDiseaseStatus());
 
-        return farmStateRepository.save(existingState);
+        return recorded(farmStateRepository.save(existingState));
     }
 
     @Override

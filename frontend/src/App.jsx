@@ -11,6 +11,7 @@ import FarmState from "./pages/FarmState/FarmState";
 import Predictions from "./pages/Predictions/Predictions";
 import ContextInterpretation from "./pages/ContextInterpretation/ContextInterpretation";
 import AgriculturalActions from "./pages/AgriculturalActions/AgriculturalActions";
+import Monitoring from "./pages/Monitoring/Monitoring";
 import ActionPlan from "./pages/ActionPlan/ActionPlan";
 import DecisionEngine from "./pages/DecisionEngine/DecisionEngine";
 
@@ -194,6 +195,16 @@ function App() {
     element={
         <ProtectedRoute>
             <ActionPlan />
+        </ProtectedRoute>
+    }
+/>
+
+
+<Route
+    path="/monitoring"
+    element={
+        <ProtectedRoute>
+            <Monitoring />
         </ProtectedRoute>
     }
 />

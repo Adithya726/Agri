@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.agrisense.backend.model.Farm;
 import com.agrisense.backend.model.Farmer;
+import com.agrisense.backend.repository.ActionExecutionRepository;
 import com.agrisense.backend.repository.ActionPlanRepository;
+import com.agrisense.backend.repository.FarmStateReadingRepository;
 import com.agrisense.backend.repository.FarmRepository;
 import com.agrisense.backend.repository.FarmStateRepository;
 import com.agrisense.backend.repository.FarmerRepository;
@@ -19,11 +21,17 @@ public class FarmServiceImpl implements FarmService {
     private final FarmerRepository farmerRepository;
     private final FarmStateRepository farmStateRepository;
     private final ActionPlanRepository actionPlanRepository;
+    private final ActionExecutionRepository actionExecutionRepository;
+    private final FarmStateReadingRepository readingRepository;
 
     public FarmServiceImpl(FarmRepository farmRepository,
                            FarmerRepository farmerRepository,
                            FarmStateRepository farmStateRepository,
-                           ActionPlanRepository actionPlanRepository) {
+                           ActionPlanRepository actionPlanRepository,
+                           ActionExecutionRepository actionExecutionRepository,
+                           FarmStateReadingRepository readingRepository) {
+        this.actionExecutionRepository = actionExecutionRepository;
+        this.readingRepository = readingRepository;
         this.farmRepository = farmRepository;
         this.farmerRepository = farmerRepository;
         this.farmStateRepository = farmStateRepository;
@@ -90,6 +98,12 @@ public class FarmServiceImpl implements FarmService {
         if (farm == null) {
             return false;
         }
+
+        // Monitoring records point at plan items and at the farm.
+        actionExecutionRepository.deleteAll(
+                actionExecutionRepository.findByActionPlanItemActionPlanFarmId(id));
+        readingRepository.deleteAll(
+                readingRepository.findByFarmIdOrderByRecordedAtDesc(id));
 
         actionPlanRepository.deleteAll(
                 actionPlanRepository.findByFarmIdOrderByCreatedAtDesc(id));
