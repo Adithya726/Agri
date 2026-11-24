@@ -10,6 +10,8 @@ import com.agrisense.backend.dto.ContextInterpretationResponse;
 
 import com.agrisense.backend.dto.ContextInterpretationResponse.ContextItem;
 
+import com.agrisense.backend.exception.ResourceNotFoundException;
+
 import com.agrisense.backend.model.Farm;
 
 import com.agrisense.backend.model.FarmState;
@@ -50,7 +52,7 @@ public class ContextInterpretationServiceImpl
 
                 .orElseThrow(() ->
 
-                        new RuntimeException("Farm not found"));
+                        new ResourceNotFoundException("Farm not found"));
 
         FarmState farmState = farmStateRepository
 
@@ -58,7 +60,7 @@ public class ContextInterpretationServiceImpl
 
                 .orElseThrow(() ->
 
-                        new RuntimeException("Farm state not found"));
+                        new ResourceNotFoundException("Farm state not found"));
 
         List<ContextItem> context = new ArrayList<>();
 

@@ -2,9 +2,10 @@ package com.agrisense.backend.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import com.agrisense.backend.dto.ActionPlanItemResponse;
 import com.agrisense.backend.dto.ActionPlanResponse;
 import com.agrisense.backend.dto.ConstraintValidationRequest;
 import com.agrisense.backend.dto.ConstraintValidationResponse;
+import com.agrisense.backend.dto.DecisionResponse.RankedAction;
 import com.agrisense.backend.model.ActionPlan;
 import com.agrisense.backend.model.ActionPlanItem;
 import com.agrisense.backend.model.AgriculturalAction;
@@ -32,18 +34,28 @@ public class ActionPlanServiceImpl implements ActionPlanService {
     private final FarmStateRepository farmStateRepository;
     private final ConstraintValidationService constraintValidationService;
 
+    private final RiskAnalysisService riskAnalysisService;
+
+    private final ActionPrioritizer actionPrioritizer;
+
     public ActionPlanServiceImpl(
             ActionPlanRepository actionPlanRepository,
             AgriculturalActionRepository agriculturalActionRepository,
             FarmRepository farmRepository,
             FarmStateRepository farmStateRepository,
-            ConstraintValidationService constraintValidationService) {
+            ConstraintValidationService constraintValidationService,
+            RiskAnalysisService riskAnalysisService,
+            ActionPrioritizer actionPrioritizer) {
 
         this.actionPlanRepository = actionPlanRepository;
         this.agriculturalActionRepository = agriculturalActionRepository;
         this.farmRepository = farmRepository;
         this.farmStateRepository = farmStateRepository;
         this.constraintValidationService = constraintValidationService;
+
+        this.riskAnalysisService = riskAnalysisService;
+
+        this.actionPrioritizer = actionPrioritizer;
     }
 
     // Generate a draft action plan for a farm
@@ -89,15 +101,7 @@ public class ActionPlanServiceImpl implements ActionPlanService {
                                                 farmState.getGrowthStage() == null
                                                         ? ""
                                                         : farmState.getGrowthStage().trim()))
-                        .filter(action ->
-                                "REFERENCE_SUPPORTED".equalsIgnoreCase(
-                                        action.getEvidenceStatus())
-                                && action.getSourceReference() != null
-                                && !action.getSourceReference().trim().isEmpty()
-                                && !action.getSourceReference()
-                                        .toLowerCase(Locale.ROOT)
-                                        .contains(
-                                                "use the actual agricultural reference"))
+                        .filter(ActionPrioritizer::isReferenceSupported)
                         .collect(
                                 java.util.stream.Collectors.toCollection(
                                         ArrayList::new));
@@ -108,6 +112,8 @@ public class ActionPlanServiceImpl implements ActionPlanService {
         plan.setCreatedAt(LocalDateTime.now());
 
         // Validate each eligible action against the current farm state.
+        List<ActionPrioritizer.Candidate> candidates = new ArrayList<>();
+
         for (AgriculturalAction action : actions) {
 
             ConstraintValidationRequest request =
@@ -119,24 +125,32 @@ public class ActionPlanServiceImpl implements ActionPlanService {
             ConstraintValidationResponse validation =
                     constraintValidationService.validateAction(request);
 
-            ActionPlanItem item = new ActionPlanItem();
-            item.setAgriculturalAction(action);
-            item.setValidationStatus(validation.getOverallStatus());
-            item.setValidationMessage(validation.getMessage());
-
-            plan.addItem(item);
+            candidates.add(new ActionPrioritizer.Candidate(action, validation));
         }
 
-        // Prioritize feasible actions, followed by unknown and infeasible actions.
-        plan.getItems().sort(
-                Comparator.comparingInt(
-                        item -> statusPriority(item.getValidationStatus()))
-        );
+        // Order with the decision engine: feasible actions that fit the
+        // farm's combined water and budget first (higher risk relevance
+        // first), then deferred, unknown and infeasible ones. Each item
+        // keeps its validation status and gets the specific reasons.
+        ActionPrioritizer.Result ranking = actionPrioritizer.prioritize(
+                candidates,
+                riskAnalysisService.analyzeFarmRisks(farmId),
+                farmState);
+
+        Map<Long, AgriculturalAction> byId = new HashMap<>();
+        actions.forEach(action -> byId.put(action.getId(), action));
 
         int sequence = 1;
 
-        for (ActionPlanItem item : plan.getItems()) {
+        for (RankedAction ranked : ranking.actions()) {
+
+            ActionPlanItem item = new ActionPlanItem();
+            item.setAgriculturalAction(byId.get(ranked.actionId()));
+            item.setValidationStatus(ranked.validationStatus());
+            item.setValidationMessage(planMessage(ranked));
             item.setSequenceOrder(sequence++);
+
+            plan.addItem(item);
         }
 
         ActionPlan savedPlan = actionPlanRepository.save(plan);
@@ -144,22 +158,13 @@ public class ActionPlanServiceImpl implements ActionPlanService {
         return convertToResponse(savedPlan);
     }
 
-    // Assign priority based on validation status.
-    private int statusPriority(String status) {
+    // Decision and reasons, within the item's 1000-character column.
+    private String planMessage(RankedAction ranked) {
 
-        if ("FEASIBLE".equalsIgnoreCase(status)) {
-            return 1;
-        }
+        String text = ranked.decision() + ": "
+                + String.join(" ", ranked.reasons());
 
-        if ("UNKNOWN".equalsIgnoreCase(status)) {
-            return 2;
-        }
-
-        if ("INFEASIBLE".equalsIgnoreCase(status)) {
-            return 3;
-        }
-
-        return 4;
+        return text.length() <= 1000 ? text : text.substring(0, 997) + "...";
     }
 
     // Get one action plan by ID.

@@ -65,6 +65,14 @@ public class OwnershipGuard {
         return role != null && ADMIN_ROLE.equalsIgnoreCase(role.toString());
     }
 
+    // Only an ADMIN may change shared reference data.
+    public void requireAdmin() {
+        currentFarmerId();
+        if (!isAdmin()) {
+            throw new AccessDeniedException("Only an administrator can do this");
+        }
+    }
+
     // The signed-in farmer's own record (used as the owner of new farms).
     public Farmer currentFarmer() {
         Long id = currentFarmerId();

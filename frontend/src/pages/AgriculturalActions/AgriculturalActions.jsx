@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../../components/Sidebar/Sidebar";
+import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import {
     getAllAgriculturalActions,
@@ -34,6 +35,10 @@ const INITIAL_FORM = {
 
 function AgriculturalActions() {
     const { t } = useLanguage();
+
+    const { farmer } = useAuth();
+    // Actions are shared reference data; only an ADMIN may add them.
+    const isAdmin = farmer?.role === "ADMIN";
 
     const [actions, setActions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -207,6 +212,7 @@ function AgriculturalActions() {
                                     {t("refresh")}
                                 </button>
 
+                                {isAdmin && (
                                 <button
                                     type="button"
                                     className="primary-action-button"
@@ -223,6 +229,7 @@ function AgriculturalActions() {
                                         ? t("cancel")
                                         : t("addAgriculturalAction")}
                                 </button>
+                                )}
                             </div>
                         </div>
 
@@ -238,11 +245,15 @@ function AgriculturalActions() {
                                 <p>
                                     {t("agriculturalActionsKnowledgeDescription")}
                                 </p>
+
+                                {!isAdmin && (
+                                    <p>{t("agriculturalActionsAdminOnly")}</p>
+                                )}
                             </div>
                         </div>
 
                         {/* Add agricultural action */}
-                        {showForm && (
+                        {isAdmin && showForm && (
                             <div className="action-form-card">
                                 <div className="section-heading">
                                     <h2>{t("addAgriculturalAction")}</h2>

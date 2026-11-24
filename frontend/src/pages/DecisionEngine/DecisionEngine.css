@@ -1,0 +1,221 @@
+.decision-page {
+    margin-left: 232px;
+    min-height: 100vh;
+    padding: 28px 32px;
+    box-sizing: border-box;
+}
+
+.decision-card {
+    background: #ffffff;
+    border: 1px solid #e3e8e5;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+}
+
+.decision-card h2,
+.decision-card h3 {
+    margin: 0 0 10px;
+}
+
+.decision-card h4 {
+    margin: 10px 0 4px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.decision-farm-selection {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.decision-farm-selection select {
+    flex: 1;
+    min-width: 200px;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid #d7ded9;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.decision-refresh {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 8px;
+    background: #166534;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.decision-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.decision-spin {
+    animation: decision-spin 1s linear infinite;
+}
+
+@keyframes decision-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.decision-loading,
+.decision-empty,
+.decision-muted {
+    color: #64748b;
+}
+
+.decision-error {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.decision-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.decision-summary p {
+    margin: 2px 0;
+}
+
+.decision-message {
+    font-weight: 600;
+}
+
+.decision-risk {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: #f1f5f9;
+}
+
+.decision-risk strong {
+    font-size: 22px;
+}
+
+.decision-risk-low { background: #dcfce7; color: #166534; }
+.decision-risk-medium { background: #fef9c3; color: #854d0e; }
+.decision-risk-high { background: #fee2e2; color: #b91c1c; }
+
+.decision-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.decision-grid .decision-card {
+    margin-bottom: 0;
+}
+
+.decision-grid + .decision-card {
+    margin-top: 20px;
+}
+
+.decision-list {
+    margin: 0;
+    padding-left: 18px;
+    line-height: 1.6;
+}
+
+.decision-signal {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 10px;
+}
+
+.decision-signal span {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.decision-actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.decision-action {
+    border: 1px solid #e3e8e5;
+    border-left-width: 5px;
+    border-radius: 10px;
+    padding: 12px 16px;
+}
+
+.decision-action-recommended { border-left-color: #16a34a; }
+.decision-action-deferred { border-left-color: #ca8a04; }
+.decision-action-needs_data { border-left-color: #64748b; }
+.decision-action-rejected { border-left-color: #dc2626; }
+
+.decision-action-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.decision-action-body ul {
+    margin: 0;
+    padding-left: 18px;
+    line-height: 1.5;
+}
+
+.decision-rank,
+.decision-step {
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.decision-step {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #e0f2fe;
+}
+
+.decision-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-right: 6px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.decision-pill-high,
+.decision-pill-rejected { background: #fee2e2; color: #b91c1c; }
+.decision-pill-medium,
+.decision-pill-deferred { background: #fef9c3; color: #854d0e; }
+.decision-pill-low,
+.decision-pill-recommended { background: #dcfce7; color: #166534; }
+
+@media (max-width: 900px) {
+    .decision-page {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+}

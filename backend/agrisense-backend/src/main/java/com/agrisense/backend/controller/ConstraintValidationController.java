@@ -1,5 +1,8 @@
 package com.agrisense.backend.controller;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.agrisense.backend.dto.ConstraintValidationRequest;
 import com.agrisense.backend.dto.ConstraintValidationResponse;
+import com.agrisense.backend.exception.InvalidRequestException;
 import com.agrisense.backend.security.OwnershipGuard;
 import com.agrisense.backend.service.ConstraintValidationService;
 
@@ -36,13 +40,25 @@ public class ConstraintValidationController {
     @PostMapping("/validate")
     public ResponseEntity<ConstraintValidationResponse>
             validateAction(
-                    @RequestBody
+                    @RequestBody(required = false)
                     ConstraintValidationRequest request) {
 
-        // A missing farmId is reported by the service as before.
-        if (request != null && request.getFarmId() != null) {
-            ownershipGuard.requireFarm(request.getFarmId());
+        // Missing ids are a bad request (400), not a missing resource.
+        if (request == null
+                || request.getFarmId() == null
+                || request.getActionId() == null) {
+            Map<String, String> errors = new LinkedHashMap<>();
+            if (request == null || request.getFarmId() == null) {
+                errors.put("farmId", "Farm ID is required.");
+            }
+            if (request == null || request.getActionId() == null) {
+                errors.put("actionId", "Action ID is required.");
+            }
+            throw new InvalidRequestException(
+                    "Farm ID and Action ID are required.", errors);
         }
+
+        ownershipGuard.requireFarm(request.getFarmId());
 
         ConstraintValidationResponse response =
                 constraintValidationService

@@ -156,6 +156,20 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* Decision Engine */}
+                <NavLink
+                    to="/decision-engine"
+                    className={({ isActive }) =>
+                        `sidebar-link ${
+                            isActive ? "active" : ""
+                        }`
+                    }
+                >
+                    <span className="sidebar-icon">🎯</span>
+                    <span>{t("decisionEngine")}</span>
+                </NavLink>
+
+
                 {/* Action Plan */}
                 <NavLink
                     to="/action-plan"

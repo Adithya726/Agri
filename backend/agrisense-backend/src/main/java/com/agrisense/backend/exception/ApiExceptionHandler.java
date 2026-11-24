@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /*
  * Turns the ownership and validation exceptions into JSON responses
@@ -41,6 +42,12 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, Object>> unreadable(HttpMessageNotReadableException e) {
         return body(HttpStatus.BAD_REQUEST,
                 "Malformed request body: check that numeric fields contain numbers");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> typeMismatch(MethodArgumentTypeMismatchException e) {
+        return body(HttpStatus.BAD_REQUEST,
+                "Invalid value for '" + e.getName() + "'");
     }
 
     private ResponseEntity<Map<String, Object>> body(HttpStatus status, String message) {

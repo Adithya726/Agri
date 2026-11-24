@@ -3,6 +3,7 @@ package com.agrisense.backend.controller;
 import com.agrisense.backend.dto.AgriculturalActionRequest;
 import com.agrisense.backend.dto.AgriculturalActionResponse;
 import com.agrisense.backend.model.AgriculturalAction;
+import com.agrisense.backend.security.OwnershipGuard;
 import com.agrisense.backend.service.AgriculturalActionService;
 
 import org.springframework.http.ResponseEntity;
@@ -16,16 +17,23 @@ import java.util.List;
 public class AgriculturalActionController {
 
     private final AgriculturalActionService service;
+    private final OwnershipGuard ownershipGuard;
 
     public AgriculturalActionController(
-            AgriculturalActionService service) {
+            AgriculturalActionService service,
+            OwnershipGuard ownershipGuard) {
 
         this.service = service;
+        this.ownershipGuard = ownershipGuard;
     }
 
     @PostMapping("/add")
     public ResponseEntity<AgriculturalActionResponse> addAction(
             @RequestBody AgriculturalActionRequest request) {
+
+        // Actions are shared reference data used for every farm's
+        // decisions and plans, so only an ADMIN may add them.
+        ownershipGuard.requireAdmin();
 
         return ResponseEntity.ok(
                 service.addAction(request)

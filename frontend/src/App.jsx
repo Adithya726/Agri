@@ -12,6 +12,7 @@ import Predictions from "./pages/Predictions/Predictions";
 import ContextInterpretation from "./pages/ContextInterpretation/ContextInterpretation";
 import AgriculturalActions from "./pages/AgriculturalActions/AgriculturalActions";
 import ActionPlan from "./pages/ActionPlan/ActionPlan";
+import DecisionEngine from "./pages/DecisionEngine/DecisionEngine";
 
 function ProtectedRoute({ children }) {
 
@@ -173,6 +174,16 @@ function App() {
     element={
         <ProtectedRoute>
             <AgriculturalActions />
+        </ProtectedRoute>
+    }
+/>
+
+
+<Route
+    path="/decision-engine"
+    element={
+        <ProtectedRoute>
+            <DecisionEngine />
         </ProtectedRoute>
     }
 />
