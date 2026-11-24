@@ -465,3 +465,63 @@
         flex-direction: column;
     }
 }
+/* Validation errors */
+
+.state-form-group input[aria-invalid="true"],
+.state-form-group select[aria-invalid="true"] {
+    border-color: #c62828;
+}
+
+.state-form-group .state-field-error {
+    color: #c62828;
+    font-weight: 600;
+}
+
+/* Current saved state */
+
+.current-state-card {
+    background: white;
+    border: 1px solid #e0e7e2;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+}
+
+.current-state-card h2 {
+    margin: 0 0 12px;
+    color: #123c2a;
+    font-size: 17px;
+}
+
+.current-state-card p {
+    margin: 0;
+    color: #718078;
+    font-size: 13px;
+}
+
+.current-state-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.current-state-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: #f5f9f6;
+    border-radius: 8px;
+    padding: 9px 11px;
+    min-width: 0;
+}
+
+.current-state-item span {
+    color: #718078;
+    font-size: 11px;
+}
+
+.current-state-item strong {
+    color: #1f3a2c;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}

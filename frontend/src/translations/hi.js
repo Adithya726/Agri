@@ -1056,6 +1056,16 @@ riskEvidenceConfirmed: "रोग होने की पुष्टि हु�
     actionPlanAcceptedToast: "योजना स्वीकार की गई।",
     actionPlanRejectedToast: "योजना अस्वीकार की गई।",
     actionPlanReviewFailed: "योजना अपडेट नहीं हो सकी।",
+
+    // Farm State validation / summary
+    currentFarmState: "वर्तमान सहेजी गई स्थिति",
+    noFarmStateYet: "इस खेत के लिए अभी कोई स्थिति सहेजी नहीं गई है। नीचे फ़ॉर्म भरकर बनाएं।",
+    notRecorded: "दर्ज नहीं",
+    fixFormErrors: "कृपया चिह्नित फ़ील्ड ठीक करें।",
+    errNotNumber: "मान्य संख्या दर्ज करें।",
+    errWholeNumber: "पूर्ण संख्या दर्ज करें।",
+    errNonNegative: "ऋणात्मक नहीं हो सकता।",
+    errValueRange: "{min} और {max} के बीच होना चाहिए।",
 };
 
 export default hi;

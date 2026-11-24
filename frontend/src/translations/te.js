@@ -1066,6 +1066,16 @@ riskEvidenceConfirmed: "వ్యాధి ఉన్నట్లు నిర్
     actionPlanAcceptedToast: "ప్రణాళిక ఆమోదించబడింది.",
     actionPlanRejectedToast: "ప్రణాళిక తిరస్కరించబడింది.",
     actionPlanReviewFailed: "ప్రణాళికను నవీకరించలేకపోయాం.",
+
+    // Farm State validation / summary
+    currentFarmState: "ప్రస్తుత సేవ్ చేసిన స్థితి",
+    noFarmStateYet: "ఈ పొలానికి ఇంకా ఎలాంటి స్థితి సేవ్ కాలేదు. కింది ఫారమ్ నింపి సృష్టించండి.",
+    notRecorded: "నమోదు కాలేదు",
+    fixFormErrors: "దయచేసి గుర్తించిన ఫీల్డ్‌లను సరిచేయండి.",
+    errNotNumber: "సరైన సంఖ్యను నమోదు చేయండి.",
+    errWholeNumber: "పూర్ణ సంఖ్యను నమోదు చేయండి.",
+    errNonNegative: "ప్రతికూలంగా ఉండకూడదు.",
+    errValueRange: "{min} మరియు {max} మధ్య ఉండాలి.",
 };
 
 export default te;

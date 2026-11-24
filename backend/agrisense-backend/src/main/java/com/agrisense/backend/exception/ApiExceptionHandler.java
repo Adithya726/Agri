@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -29,7 +30,17 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<Map<String, Object>> badRequest(InvalidRequestException e) {
-        return body(HttpStatus.BAD_REQUEST, e.getMessage());
+        ResponseEntity<Map<String, Object>> response = body(HttpStatus.BAD_REQUEST, e.getMessage());
+        if (!e.getFieldErrors().isEmpty()) {
+            response.getBody().put("errors", e.getFieldErrors());
+        }
+        return response;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> unreadable(HttpMessageNotReadableException e) {
+        return body(HttpStatus.BAD_REQUEST,
+                "Malformed request body: check that numeric fields contain numbers");
     }
 
     private ResponseEntity<Map<String, Object>> body(HttpStatus status, String message) {

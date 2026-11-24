@@ -19,6 +19,99 @@ import {
 import "./FarmState.css";
 import farmFields from "../../assets/farm-fields.jpg";
 
+
+/*
+ * Range rules for the numeric farm state fields.
+ * These mirror the backend FarmStateValidator so the farmer
+ * sees a problem before the request is sent; the backend
+ * still enforces them and its field errors are shown too.
+ */
+const NUMERIC_RULES = {
+    soilMoisture: { min: 0, max: 100 },
+    soilPh: { min: 0, max: 14 },
+    nitrogen: { min: 0 },
+    phosphorus: { min: 0 },
+    potassium: { min: 0 },
+    temperature: { min: -50, max: 60 },
+    humidity: { min: 0, max: 100 },
+    rainfall: { min: 0 },
+    waterAvailable: { min: 0 },
+    labourAvailable: { min: 0, integer: true },
+    budgetAvailable: { min: 0 }
+};
+
+const GROWTH_STAGE_OPTIONS = [
+    "Seedling", "Vegetative", "Flowering", "Fruiting", "Maturity", "Harvest"
+];
+
+const CROP_HEALTH_OPTIONS = ["Healthy", "Moderate", "Poor", "Unknown"];
+
+const DISEASE_STATUS_OPTIONS = [
+    "No known disease", "Suspected", "Confirmed", "Unknown"
+];
+
+/*
+ * Fields shown in the "current saved state" summary,
+ * with the translation key of their label and their unit.
+ */
+const SUMMARY_FIELDS = [
+    ["crop", "crop", ""],
+    ["growthStage", "growthStage", ""],
+    ["soilMoisture", "soilMoisture", "%"],
+    ["soilPh", "soilPh", ""],
+    ["nitrogen", "nitrogen", ""],
+    ["phosphorus", "phosphorus", ""],
+    ["potassium", "potassium", ""],
+    ["temperature", "temperature", "°C"],
+    ["humidity", "humidity", "%"],
+    ["rainfall", "rainfall", "mm"],
+    ["waterAvailable", "waterAvailable", ""],
+    ["labourAvailable", "labourAvailable", ""],
+    ["budgetAvailable", "budgetAvailable", ""],
+    ["cropHealth", "cropHealth", ""],
+    ["diseaseStatus", "diseaseStatus", ""]
+];
+
+const validateFarmStateForm = (formData, t) => {
+
+    const errors = {};
+
+    Object.entries(NUMERIC_RULES).forEach(([field, rule]) => {
+
+        const raw = formData[field];
+
+        if (raw === "" || raw === null || raw === undefined) {
+            return;
+        }
+
+        const value = Number(raw);
+
+        if (!Number.isFinite(value)) {
+            errors[field] = t("errNotNumber");
+            return;
+        }
+
+        if (rule.integer && !Number.isInteger(value)) {
+            errors[field] = t("errWholeNumber");
+            return;
+        }
+
+        if (rule.max !== undefined
+            && (value < rule.min || value > rule.max)) {
+
+            errors[field] = t("errValueRange")
+                .replace("{min}", rule.min)
+                .replace("{max}", rule.max);
+
+        } else if (value < rule.min) {
+
+            errors[field] = t("errNonNegative");
+        }
+    });
+
+    return errors;
+};
+
 function FarmState() {
 
     const { farmer } = useAuth();
@@ -32,6 +125,8 @@ function FarmState() {
     const [loadingFarms, setLoadingFarms] = useState(true);
     const [loadingState, setLoadingState] = useState(false);
     const [saving, setSaving] = useState(false);
+
+    const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
         crop: "",
@@ -268,6 +363,8 @@ function FarmState() {
          */
         setSelectedFarmId(farmId);
 
+        setErrors({});
+
         /*
          * Clear previous farm state immediately.
          * This prevents accidental update of the
@@ -325,6 +422,17 @@ function FarmState() {
 
         }));
 
+        if (errors[name]) {
+
+            setErrors((previous) => {
+
+                const next = { ...previous };
+                delete next[name];
+
+                return next;
+            });
+        }
+
     };
 
 
@@ -341,6 +449,19 @@ function FarmState() {
 
             return;
         }
+
+        const clientErrors = validateFarmStateForm(formData, t);
+
+        if (Object.keys(clientErrors).length > 0) {
+
+            setErrors(clientErrors);
+
+            toast.error(t("fixFormErrors"));
+
+            return;
+        }
+
+        setErrors({});
 
         try {
 
@@ -464,6 +585,15 @@ function FarmState() {
         } catch (error) {
 
             console.error(error);
+
+            /*
+             * The backend returns per-field messages for
+             * out-of-range values; show them next to the inputs.
+             */
+            if (error.response?.data?.errors) {
+
+                setErrors(error.response.data.errors);
+            }
 
             toast.error(
                 error.response?.data?.message ||
@@ -679,6 +809,62 @@ function FarmState() {
                         )}
 
 
+                        {/* Current saved Farm State */}
+
+                        {!loadingState && (
+
+                            <section
+                                className="current-state-card"
+                                data-testid="current-farm-state"
+                            >
+
+                                <h2>
+                                    {t("currentFarmState")}
+                                </h2>
+
+                                {farmState ? (
+
+                                    <div className="current-state-grid">
+
+                                        {SUMMARY_FIELDS.map(([field, labelKey, unit]) => (
+
+                                            <div
+                                                key={field}
+                                                className="current-state-item"
+                                                data-field={field}
+                                            >
+
+                                                <span>
+                                                    {t(labelKey)}
+                                                </span>
+
+                                                <strong>
+                                                    {farmState[field] === null
+                                                        || farmState[field] === undefined
+                                                        || farmState[field] === ""
+                                                        ? t("notRecorded")
+                                                        : `${farmState[field]}${unit ? ` ${unit}` : ""}`}
+                                                </strong>
+
+                                            </div>
+
+                                        ))}
+
+                                    </div>
+
+                                ) : (
+
+                                    <p>
+                                        {t("noFarmStateYet")}
+                                    </p>
+
+                                )}
+
+                            </section>
+
+                        )}
+
+
                         {/* Farm State Loading */}
 
                         {loadingState ? (
@@ -694,6 +880,7 @@ function FarmState() {
                             <form
                                 className="farm-state-form"
                                 onSubmit={handleSave}
+                                noValidate
                             >
 
                                 {/* Crop Information */}
@@ -734,10 +921,17 @@ function FarmState() {
                                             <input
                                                 type="text"
                                                 name="crop"
+                                                aria-invalid={Boolean(errors.crop)}
                                                 value={formData.crop}
                                                 onChange={handleChange}
                                                 placeholder={t("cropExample")}
                                             />
+
+                                            {errors.crop && (
+                                                <small className="state-field-error">
+                                                    {errors.crop}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -782,7 +976,20 @@ function FarmState() {
                                                     {t("harvest")}
                                                 </option>
 
+                                            {formData.growthStage
+                                                    && !GROWTH_STAGE_OPTIONS.includes(formData.growthStage) && (
+                                                    <option value={formData.growthStage}>
+                                                        {formData.growthStage}
+                                                    </option>
+                                                )}
+
                                             </select>
+
+                                            {errors.growthStage && (
+                                                <small className="state-field-error">
+                                                    {errors.growthStage}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -831,6 +1038,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="soilMoisture"
+                                                aria-invalid={Boolean(errors.soilMoisture)}
                                                 value={
                                                     formData.soilMoisture
                                                 }
@@ -841,6 +1049,12 @@ function FarmState() {
                                             <small>
                                                 {t("measuredMoisture")}
                                             </small>
+
+                                            {errors.soilMoisture && (
+                                                <small className="state-field-error">
+                                                    {errors.soilMoisture}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -856,6 +1070,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="soilPh"
+                                                aria-invalid={Boolean(errors.soilPh)}
                                                 value={formData.soilPh}
                                                 onChange={handleChange}
                                                 min="0"
@@ -866,6 +1081,12 @@ function FarmState() {
                                             <small>
                                                 {t("phScale")}
                                             </small>
+
+                                            {errors.soilPh && (
+                                                <small className="state-field-error">
+                                                    {errors.soilPh}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -881,6 +1102,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="nitrogen"
+                                                aria-invalid={Boolean(errors.nitrogen)}
                                                 value={formData.nitrogen}
                                                 onChange={handleChange}
                                                 min="0"
@@ -889,6 +1111,12 @@ function FarmState() {
                                                     "nitrogenUnit"
                                                 )}
                                             />
+
+                                            {errors.nitrogen && (
+                                                <small className="state-field-error">
+                                                    {errors.nitrogen}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -904,6 +1132,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="phosphorus"
+                                                aria-invalid={Boolean(errors.phosphorus)}
                                                 value={formData.phosphorus}
                                                 onChange={handleChange}
                                                 min="0"
@@ -912,6 +1141,12 @@ function FarmState() {
                                                     "phosphorusUnit"
                                                 )}
                                             />
+
+                                            {errors.phosphorus && (
+                                                <small className="state-field-error">
+                                                    {errors.phosphorus}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -927,6 +1162,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="potassium"
+                                                aria-invalid={Boolean(errors.potassium)}
                                                 value={formData.potassium}
                                                 onChange={handleChange}
                                                 min="0"
@@ -935,6 +1171,12 @@ function FarmState() {
                                                     "potassiumUnit"
                                                 )}
                                             />
+
+                                            {errors.potassium && (
+                                                <small className="state-field-error">
+                                                    {errors.potassium}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -981,6 +1223,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="temperature"
+                                                aria-invalid={Boolean(errors.temperature)}
                                                 value={
                                                     formData.temperature
                                                 }
@@ -990,6 +1233,12 @@ function FarmState() {
                                                 )}
                                                 step="0.01"
                                             />
+
+                                            {errors.temperature && (
+                                                <small className="state-field-error">
+                                                    {errors.temperature}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -1003,6 +1252,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="humidity"
+                                                aria-invalid={Boolean(errors.humidity)}
                                                 value={
                                                     formData.humidity
                                                 }
@@ -1014,6 +1264,12 @@ function FarmState() {
                                                 max="100"
                                                 step="0.01"
                                             />
+
+                                            {errors.humidity && (
+                                                <small className="state-field-error">
+                                                    {errors.humidity}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -1027,6 +1283,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="rainfall"
+                                                aria-invalid={Boolean(errors.rainfall)}
                                                 value={
                                                     formData.rainfall
                                                 }
@@ -1037,6 +1294,12 @@ function FarmState() {
                                                 min="0"
                                                 step="0.01"
                                             />
+
+                                            {errors.rainfall && (
+                                                <small className="state-field-error">
+                                                    {errors.rainfall}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -1083,6 +1346,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="waterAvailable"
+                                                aria-invalid={Boolean(errors.waterAvailable)}
                                                 value={
                                                     formData.waterAvailable
                                                 }
@@ -1093,6 +1357,12 @@ function FarmState() {
                                                 min="0"
                                                 step="0.01"
                                             />
+
+                                            {errors.waterAvailable && (
+                                                <small className="state-field-error">
+                                                    {errors.waterAvailable}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -1106,6 +1376,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="labourAvailable"
+                                                aria-invalid={Boolean(errors.labourAvailable)}
                                                 value={
                                                     formData.labourAvailable
                                                 }
@@ -1116,6 +1387,12 @@ function FarmState() {
                                                 min="0"
                                                 step="1"
                                             />
+
+                                            {errors.labourAvailable && (
+                                                <small className="state-field-error">
+                                                    {errors.labourAvailable}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -1129,6 +1406,7 @@ function FarmState() {
                                             <input
                                                 type="number"
                                                 name="budgetAvailable"
+                                                aria-invalid={Boolean(errors.budgetAvailable)}
                                                 value={
                                                     formData.budgetAvailable
                                                 }
@@ -1139,6 +1417,12 @@ function FarmState() {
                                                 min="0"
                                                 step="0.01"
                                             />
+
+                                            {errors.budgetAvailable && (
+                                                <small className="state-field-error">
+                                                    {errors.budgetAvailable}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -1210,7 +1494,20 @@ function FarmState() {
                                                     {t("unknown")}
                                                 </option>
 
+                                            {formData.cropHealth
+                                                    && !CROP_HEALTH_OPTIONS.includes(formData.cropHealth) && (
+                                                    <option value={formData.cropHealth}>
+                                                        {formData.cropHealth}
+                                                    </option>
+                                                )}
+
                                             </select>
+
+                                            {errors.cropHealth && (
+                                                <small className="state-field-error">
+                                                    {errors.cropHealth}
+                                                </small>
+                                            )}
 
                                         </div>
 
@@ -1249,7 +1546,20 @@ function FarmState() {
                                                     {t("unknown")}
                                                 </option>
 
+                                            {formData.diseaseStatus
+                                                    && !DISEASE_STATUS_OPTIONS.includes(formData.diseaseStatus) && (
+                                                    <option value={formData.diseaseStatus}>
+                                                        {formData.diseaseStatus}
+                                                    </option>
+                                                )}
+
                                             </select>
+
+                                            {errors.diseaseStatus && (
+                                                <small className="state-field-error">
+                                                    {errors.diseaseStatus}
+                                                </small>
+                                            )}
 
                                         </div>
 

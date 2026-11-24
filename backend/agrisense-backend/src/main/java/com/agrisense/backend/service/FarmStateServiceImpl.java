@@ -8,6 +8,7 @@ import com.agrisense.backend.model.Farm;
 import com.agrisense.backend.model.FarmState;
 import com.agrisense.backend.repository.FarmRepository;
 import com.agrisense.backend.repository.FarmStateRepository;
+import com.agrisense.backend.validation.FarmStateValidator;
 
 @Service
 public class FarmStateServiceImpl implements FarmStateService {
@@ -26,6 +27,8 @@ public class FarmStateServiceImpl implements FarmStateService {
 
     @Override
     public FarmState addFarmState(FarmState farmState) {
+
+        FarmStateValidator.validate(farmState);
 
         Farm farm = farmRepository
                 .findById(farmState.getFarm().getId())
@@ -108,6 +111,8 @@ public class FarmStateServiceImpl implements FarmStateService {
     public FarmState updateFarmState(
             Long id,
             FarmState farmState) {
+
+        FarmStateValidator.validate(farmState);
 
         FarmState existingState =
                 farmStateRepository

@@ -1125,6 +1125,16 @@ contextRainfallLabel: "Rainfall",
     actionPlanAcceptedToast: "Plan accepted.",
     actionPlanRejectedToast: "Plan rejected.",
     actionPlanReviewFailed: "Could not update the plan.",
+
+    // Farm State validation / summary
+    currentFarmState: "Current saved state",
+    noFarmStateYet: "No farm state is saved for this farm yet. Fill in the form below to create one.",
+    notRecorded: "Not recorded",
+    fixFormErrors: "Please fix the highlighted fields.",
+    errNotNumber: "Enter a valid number.",
+    errWholeNumber: "Enter a whole number.",
+    errNonNegative: "Cannot be negative.",
+    errValueRange: "Must be between {min} and {max}.",
 };
 
 

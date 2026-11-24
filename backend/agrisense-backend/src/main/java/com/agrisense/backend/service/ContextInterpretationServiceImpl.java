@@ -1261,7 +1261,9 @@ public class ContextInterpretationServiceImpl
         }
 
         if (status.contains("healthy") ||
-                status.contains("no known disease")) {
+                status.contains("no known disease") ||
+                status.contains("no disease") ||
+                status.equals("none")) {
 
             return "No disease condition reported";
         }
@@ -1294,7 +1296,9 @@ public class ContextInterpretationServiceImpl
         }
 
         if (status.contains("healthy") ||
-                status.contains("no known disease")) {
+                status.contains("no known disease") ||
+                status.contains("no disease") ||
+                status.equals("none")) {
 
             return "LOW";
         }
