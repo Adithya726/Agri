@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -48,6 +49,12 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, Object>> typeMismatch(MethodArgumentTypeMismatchException e) {
         return body(HttpStatus.BAD_REQUEST,
                 "Invalid value for '" + e.getName() + "'");
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> missingParameter(MissingServletRequestParameterException e) {
+        return body(HttpStatus.BAD_REQUEST,
+                "Missing required parameter '" + e.getParameterName() + "'");
     }
 
     private ResponseEntity<Map<String, Object>> body(HttpStatus status, String message) {

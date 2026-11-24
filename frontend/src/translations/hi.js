@@ -1136,6 +1136,31 @@ riskEvidenceConfirmed: "रोग होने की पुष्टि हु�
     actionMarkedSkipped: "कार्य छोड़ा गया चिह्नित किया गया।",
     actionReportFailed: "कार्य अपडेट नहीं हो सका।",
     actionReportCleared: "रिपोर्ट हटा दी गई।",
+
+    // Replanning
+    notApplicable: "—",
+    replanAssessmentFailed: "योजना में बदलाव की जाँच नहीं हो सकी।",
+    newPlanGenerated: "खेत की वर्तमान स्थिति से नई योजना बनाई गई।",
+    replanFailed: "नई योजना नहीं बन सकी।",
+    newPlanAccepted: "नई योजना स्वीकृत। पिछली योजना अब प्रतिस्थापित है।",
+    newPlanRejected: "नई योजना अस्वीकृत। वर्तमान योजना लागू रहेगी।",
+    replanning: "पुनर्योजना",
+    replanRecommended: "पुनर्योजना की सलाह",
+    planStillStands: "योजना अभी भी उपयुक्त",
+    replanningDescription: "योजना बनते समय की खेत की स्थिति की तुलना नवीनतम स्थिति से करता है और हर लंबित कार्य की फिर से जाँच करता है।",
+    checkingForChanges: "बदलावों की जाँच हो रही है...",
+    changesSincePlan: "योजना बनने के बाद के बदलाव",
+    whenPlanned: "योजना के समय",
+    pendingActionsReassessed: "लंबित कार्य, फिर से जाँचे गए",
+    action: "कार्य",
+    generateNewPlan: "नई योजना बनाएँ",
+    planComparison: "योजना तुलना",
+    inCurrentPlan: "वर्तमान योजना",
+    inNewPlan: "नई योजना",
+    notInPlan: "योजना में नहीं",
+    dropped: "हटाया गया",
+    acceptNewPlan: "नई योजना स्वीकार करें",
+    rejectNewPlan: "नई योजना अस्वीकार करें",
 };
 
 export default hi;

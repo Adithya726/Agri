@@ -265,6 +265,19 @@ public class ActionPlanServiceImpl implements ActionPlanService {
         plan.setStatus(decision.toUpperCase(Locale.ROOT));
         plan.setReviewedAt(LocalDateTime.now());
 
+        // One accepted plan per farm: accepting a new one (for example
+        // after replanning) supersedes the plan that was in force.
+        if ("ACCEPTED".equals(plan.getStatus()) && plan.getFarm() != null) {
+            for (ActionPlan other : actionPlanRepository
+                    .findByFarmIdOrderByCreatedAtDesc(plan.getFarm().getId())) {
+                if (!other.getId().equals(plan.getId())
+                        && "ACCEPTED".equalsIgnoreCase(other.getStatus())) {
+                    other.setStatus("SUPERSEDED");
+                    actionPlanRepository.save(other);
+                }
+            }
+        }
+
         ActionPlan savedPlan = actionPlanRepository.save(plan);
 
         return convertToResponse(savedPlan);

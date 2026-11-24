@@ -1146,6 +1146,31 @@ riskEvidenceConfirmed: "వ్యాధి ఉన్నట్లు నిర్
     actionMarkedSkipped: "చర్య వదిలేసినట్లు గుర్తించబడింది.",
     actionReportFailed: "చర్యను నవీకరించలేకపోయాం.",
     actionReportCleared: "నివేదిక తొలగించబడింది.",
+
+    // Replanning
+    notApplicable: "—",
+    replanAssessmentFailed: "ప్రణాళికలో మార్పులను తనిఖీ చేయలేకపోయాం.",
+    newPlanGenerated: "ప్రస్తుత పొలం స్థితి నుండి కొత్త ప్రణాళిక రూపొందించబడింది.",
+    replanFailed: "కొత్త ప్రణాళికను రూపొందించలేకపోయాం.",
+    newPlanAccepted: "కొత్త ప్రణాళిక ఆమోదించబడింది. మునుపటి ప్రణాళిక ఇప్పుడు భర్తీ చేయబడింది.",
+    newPlanRejected: "కొత్త ప్రణాళిక తిరస్కరించబడింది. ప్రస్తుత ప్రణాళికే అమలులో ఉంటుంది.",
+    replanning: "పునఃప్రణాళిక",
+    replanRecommended: "పునఃప్రణాళిక సూచించబడింది",
+    planStillStands: "ప్రణాళిక ఇంకా సరిపోతుంది",
+    replanningDescription: "ప్రణాళిక రూపొందించినప్పటి పొలం స్థితిని తాజా స్థితితో పోల్చి, పెండింగ్ చర్యలను మళ్లీ తనిఖీ చేస్తుంది.",
+    checkingForChanges: "మార్పులను తనిఖీ చేస్తోంది...",
+    changesSincePlan: "ప్రణాళిక తర్వాతి మార్పులు",
+    whenPlanned: "ప్రణాళిక సమయంలో",
+    pendingActionsReassessed: "పెండింగ్ చర్యలు, మళ్లీ తనిఖీ",
+    action: "చర్య",
+    generateNewPlan: "కొత్త ప్రణాళిక రూపొందించు",
+    planComparison: "ప్రణాళిక పోలిక",
+    inCurrentPlan: "ప్రస్తుత ప్రణాళిక",
+    inNewPlan: "కొత్త ప్రణాళిక",
+    notInPlan: "ప్రణాళికలో లేదు",
+    dropped: "తొలగించబడింది",
+    acceptNewPlan: "కొత్త ప్రణాళికను ఆమోదించు",
+    rejectNewPlan: "కొత్త ప్రణాళికను తిరస్కరించు",
 };
 
 export default te;

@@ -199,7 +199,7 @@ public class MonitoringServiceImpl implements MonitoringService {
                         : changes.size() + " recorded value(s) changed since this action.");
     }
 
-    static List<FieldChange> compare(FarmStateReading before, FarmStateReading after) {
+    public static List<FieldChange> compare(FarmStateReading before, FarmStateReading after) {
         List<FieldChange> out = new ArrayList<>();
         text(out, "crop", before, after, FarmStateReading::getCrop);
         text(out, "growthStage", before, after, FarmStateReading::getGrowthStage);

@@ -35,3 +35,13 @@
     .monitoring-buttons { width: 100%; }
     .monitoring-buttons button { flex: 1; }
 }
+
+.replan-flag { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.replan-yes { background: #fdecea; color: #a33a2b; }
+.replan-no { background: #e3f4e9; color: #1d6b3f; }
+.replan-reasons { margin: 10px 0; padding-left: 18px; color: #3d5247; font-size: 13px; line-height: 1.6; }
+.replan-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.replan-changed td { background: #fff8ec; }
+.replan-added td { background: #f0f9f3; }
+.replan-removed td { background: #fbf1ef; }
+.monitoring-table td.replan-wrap { white-space: normal; min-width: 180px; }

@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import com.agrisense.backend.model.ActionPlan;
 import com.agrisense.backend.model.AgriculturalAction;
 import com.agrisense.backend.model.Farm;
 import com.agrisense.backend.model.FarmState;
@@ -69,5 +70,36 @@ class ActionPlanServiceImplTest {
 
         assertTrue(e.getMessage().contains("rice at growth stage Maturity"));
         verify(plans, never()).save(any());
+    }
+
+    @Test
+    void acceptingAPlanSupersedesTheFarmsPreviouslyAcceptedPlan() {
+        Farm farm = new Farm();
+        farm.setId(1L);
+
+        ActionPlan old = new ActionPlan();
+        old.setId(1L);
+        old.setFarm(farm);
+        old.setStatus("ACCEPTED");
+
+        ActionPlan rejected = new ActionPlan();
+        rejected.setId(2L);
+        rejected.setFarm(farm);
+        rejected.setStatus("REJECTED");
+
+        ActionPlan draft = new ActionPlan();
+        draft.setId(3L);
+        draft.setFarm(farm);
+        draft.setStatus("DRAFT");
+
+        when(plans.findById(3L)).thenReturn(Optional.of(draft));
+        when(plans.findByFarmIdOrderByCreatedAtDesc(1L)).thenReturn(List.of(draft, rejected, old));
+        when(plans.save(any(ActionPlan.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.reviewPlan(3L, "ACCEPTED");
+
+        assertEquals("ACCEPTED", draft.getStatus());
+        assertEquals("SUPERSEDED", old.getStatus());
+        assertEquals("REJECTED", rejected.getStatus());
     }
 }

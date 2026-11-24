@@ -16,6 +16,8 @@ import {
     reportActionExecution
 } from "../../services/monitoringService";
 
+import ReplanPanel from "./ReplanPanel";
+
 import "../ActionPlan/ActionPlan.css";
 import "./Monitoring.css";
 
@@ -539,6 +541,13 @@ function Monitoring() {
                                     )}
 
                                 </section>
+
+
+                                <ReplanPanel
+                                    farmId={selectedFarmId}
+                                    planId={plan?.id}
+                                    onPlanChanged={() => loadMonitoring(selectedFarmId)}
+                                />
 
 
                                 <section className="action-plan-card">
