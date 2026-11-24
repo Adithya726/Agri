@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.agrisense.backend.dto.ActionPlanResponse;
+import com.agrisense.backend.security.OwnershipGuard;
 import com.agrisense.backend.service.ActionPlanService;
 
 @RestController
@@ -15,14 +16,19 @@ import com.agrisense.backend.service.ActionPlanService;
 public class ActionPlanController {
 
     private final ActionPlanService actionPlanService;
+    private final OwnershipGuard ownershipGuard;
 
-    public ActionPlanController(ActionPlanService actionPlanService) {
+    public ActionPlanController(ActionPlanService actionPlanService,
+                                OwnershipGuard ownershipGuard) {
         this.actionPlanService = actionPlanService;
+        this.ownershipGuard = ownershipGuard;
     }
 
     // Generate a draft action plan for a farm
     @PostMapping("/generate/{farmId}")
     public ResponseEntity<?> generateDraft(@PathVariable Long farmId) {
+        ownershipGuard.requireFarm(farmId);
+
         try {
             ActionPlanResponse plan =
                     actionPlanService.generateDraft(farmId);
@@ -39,6 +45,8 @@ public class ActionPlanController {
     // Get a specific action plan
     @GetMapping("/{planId}")
     public ResponseEntity<?> getPlanById(@PathVariable Long planId) {
+        ownershipGuard.requireActionPlan(planId);
+
         try {
             return ResponseEntity.ok(
                     actionPlanService.getPlanById(planId)
@@ -54,6 +62,8 @@ public class ActionPlanController {
     // Get all action plans for a farm
     @GetMapping("/farm/{farmId}")
     public ResponseEntity<?> getPlansByFarmId(@PathVariable Long farmId) {
+        ownershipGuard.requireFarm(farmId);
+
         try {
             List<ActionPlanResponse> plans =
                     actionPlanService.getPlansByFarmId(farmId);
@@ -70,6 +80,8 @@ public class ActionPlanController {
     public ResponseEntity<?> reviewPlan(
             @PathVariable Long planId,
             @RequestParam String decision) {
+
+        ownershipGuard.requireActionPlan(planId);
 
         try {
             return ResponseEntity.ok(

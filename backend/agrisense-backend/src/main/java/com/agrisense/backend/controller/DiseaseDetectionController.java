@@ -7,17 +7,22 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.agrisense.backend.security.OwnershipGuard;
+
 @RestController
 @RequestMapping("/predictionapi")
 @CrossOrigin(origins = "*")
 public class DiseaseDetectionController {
 
     private final DiseaseDetectionService diseaseDetectionService;
+    private final OwnershipGuard ownershipGuard;
 
     public DiseaseDetectionController(
-            DiseaseDetectionService diseaseDetectionService
+            DiseaseDetectionService diseaseDetectionService,
+            OwnershipGuard ownershipGuard
     ) {
         this.diseaseDetectionService = diseaseDetectionService;
+        this.ownershipGuard = ownershipGuard;
     }
 
     @PostMapping(
@@ -28,6 +33,8 @@ public class DiseaseDetectionController {
             @PathVariable Long farmId,
             @RequestParam("image") MultipartFile image
     ) {
+        ownershipGuard.requireFarm(farmId);
+
         return diseaseDetectionService.detectDisease(
                 farmId,
                 image

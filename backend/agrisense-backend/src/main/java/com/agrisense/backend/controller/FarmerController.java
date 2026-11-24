@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.agrisense.backend.dto.FarmerResponse;
 import com.agrisense.backend.dto.FarmerUpdateRequest;
+import com.agrisense.backend.exception.InvalidRequestException;
+import com.agrisense.backend.security.OwnershipGuard;
 import com.agrisense.backend.service.FarmerService;
 
 @RestController
@@ -14,15 +16,20 @@ import com.agrisense.backend.service.FarmerService;
 public class FarmerController {
 
     private final FarmerService farmerService;
+    private final OwnershipGuard ownershipGuard;
 
-    public FarmerController(FarmerService farmerService) {
+    public FarmerController(FarmerService farmerService,
+                            OwnershipGuard ownershipGuard) {
         this.farmerService = farmerService;
+        this.ownershipGuard = ownershipGuard;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<FarmerResponse> getFarmer(
             @PathVariable Long id
     ) {
+
+        ownershipGuard.requireFarmer(id);
 
         FarmerResponse farmer =
                 farmerService.getFarmerById(id);
@@ -41,6 +48,14 @@ public class FarmerController {
             @PathVariable Long id,
             @RequestBody FarmerUpdateRequest request
     ) {
+
+        ownershipGuard.requireFarmer(id);
+
+        if (request == null
+                || request.getName() == null
+                || request.getName().isBlank()) {
+            throw new InvalidRequestException("Name is required");
+        }
 
         FarmerResponse farmer =
                 farmerService.updateFarmer(id, request);

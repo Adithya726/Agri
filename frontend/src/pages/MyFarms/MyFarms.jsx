@@ -122,10 +122,8 @@ function MyFarms() {
         try {
             setSaving(true);
 
+            // The backend sets the owner from the login token.
             const farmData = {
-                farmer: {
-                    id: farmer.userId
-                },
                 farmName: form.farmName.trim(),
                 location: form.location.trim(),
                 area: Number(form.area),

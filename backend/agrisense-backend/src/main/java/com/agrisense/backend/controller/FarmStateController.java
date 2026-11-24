@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.agrisense.backend.dto.FarmStateResponse;
+import com.agrisense.backend.exception.InvalidRequestException;
 import com.agrisense.backend.model.FarmState;
+import com.agrisense.backend.security.OwnershipGuard;
 import com.agrisense.backend.service.FarmStateService;
 
 @RestController
@@ -25,14 +27,25 @@ import com.agrisense.backend.service.FarmStateService;
 public class FarmStateController {
 
     private final FarmStateService farmStateService;
+    private final OwnershipGuard ownershipGuard;
 
-    public FarmStateController(FarmStateService farmStateService) {
+    public FarmStateController(FarmStateService farmStateService,
+                               OwnershipGuard ownershipGuard) {
         this.farmStateService = farmStateService;
+        this.ownershipGuard = ownershipGuard;
     }
 
     @PostMapping("/add")
     public ResponseEntity<FarmStateResponse> addFarmState(
             @RequestBody FarmState farmState) {
+
+        if (farmState == null
+                || farmState.getFarm() == null
+                || farmState.getFarm().getId() == null) {
+            throw new InvalidRequestException("farm.id is required");
+        }
+
+        ownershipGuard.requireFarm(farmState.getFarm().getId());
 
         FarmState savedState = farmStateService.addFarmState(farmState);
 
@@ -45,7 +58,11 @@ public class FarmStateController {
     @GetMapping("/viewall")
     public ResponseEntity<List<FarmStateResponse>> getAllFarmStates() {
 
-        List<FarmState> states = farmStateService.getAllFarmStates();
+        // Admins see every farm state; a farmer sees only their farms' states.
+        List<FarmState> states = ownershipGuard.isAdmin()
+                ? farmStateService.getAllFarmStates()
+                : farmStateService.getFarmStatesByFarmerId(
+                        ownershipGuard.currentFarmerId());
 
         List<FarmStateResponse> response = states.stream()
                 .map(this::convertToResponse)
@@ -58,11 +75,7 @@ public class FarmStateController {
     public ResponseEntity<FarmStateResponse> getFarmStateById(
             @PathVariable Long id) {
 
-        FarmState state = farmStateService.getFarmStateById(id);
-
-        if (state == null) {
-            return ResponseEntity.notFound().build();
-        }
+        FarmState state = ownershipGuard.requireFarmState(id);
 
         return ResponseEntity.ok(convertToResponse(state));
     }
@@ -70,6 +83,8 @@ public class FarmStateController {
     @GetMapping("/farm/{farmId}")
     public ResponseEntity<FarmStateResponse> getFarmStateByFarmId(
             @PathVariable Long farmId) {
+
+        ownershipGuard.requireFarm(farmId);
 
         FarmState state = farmStateService.getFarmStateByFarmId(farmId);
 
@@ -85,6 +100,8 @@ public class FarmStateController {
             @PathVariable Long id,
             @RequestBody FarmState farmState) {
 
+        ownershipGuard.requireFarmState(id);
+
         FarmState updatedState =
                 farmStateService.updateFarmState(id, farmState);
 
@@ -98,6 +115,8 @@ public class FarmStateController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteFarmState(
             @PathVariable Long id) {
+
+        ownershipGuard.requireFarmState(id);
 
         boolean deleted = farmStateService.deleteFarmState(id);
 

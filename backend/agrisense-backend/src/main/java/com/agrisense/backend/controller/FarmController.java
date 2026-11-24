@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.agrisense.backend.dto.FarmResponse;
+import com.agrisense.backend.exception.InvalidRequestException;
 import com.agrisense.backend.model.Farm;
+import com.agrisense.backend.security.OwnershipGuard;
 import com.agrisense.backend.service.FarmService;
 
 @RestController
@@ -25,13 +27,21 @@ import com.agrisense.backend.service.FarmService;
 public class FarmController {
 
     private final FarmService farmService;
+    private final OwnershipGuard ownershipGuard;
 
-    public FarmController(FarmService farmService) {
+    public FarmController(FarmService farmService,
+                          OwnershipGuard ownershipGuard) {
         this.farmService = farmService;
+        this.ownershipGuard = ownershipGuard;
     }
 
+    // The owner always comes from the token, never from the request body.
     @PostMapping("/add")
     public ResponseEntity<FarmResponse> addFarm(@RequestBody Farm farm) {
+
+        validate(farm);
+        farm.setId(null);
+        farm.setFarmer(ownershipGuard.currentFarmer());
 
         Farm savedFarm = farmService.addFarm(farm);
 
@@ -46,7 +56,11 @@ public class FarmController {
     @GetMapping("/viewall")
     public ResponseEntity<List<FarmResponse>> getAllFarms() {
 
-        List<Farm> farms = farmService.getAllFarms();
+        // Admins see every farm; a farmer sees only their own.
+        List<Farm> farms = ownershipGuard.isAdmin()
+                ? farmService.getAllFarms()
+                : farmService.getFarmsByFarmerId(
+                        ownershipGuard.currentFarmerId());
 
         List<FarmResponse> response = farms.stream()
                 .map(this::convertToResponse)
@@ -59,11 +73,7 @@ public class FarmController {
     public ResponseEntity<FarmResponse> getFarmById(
             @PathVariable Long id) {
 
-        Farm farm = farmService.getFarmById(id);
-
-        if (farm == null) {
-            return ResponseEntity.notFound().build();
-        }
+        Farm farm = ownershipGuard.requireFarm(id);
 
         return ResponseEntity.ok(convertToResponse(farm));
     }
@@ -72,7 +82,9 @@ public class FarmController {
     public ResponseEntity<List<FarmResponse>> getFarmsByFarmer(
             @PathVariable Long farmerId) {
 
-    	List<Farm> farms = farmService.getFarmsByFarmerId(farmerId);
+        ownershipGuard.requireFarmer(farmerId);
+
+        List<Farm> farms = farmService.getFarmsByFarmerId(farmerId);
         List<FarmResponse> response = farms.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
@@ -84,6 +96,9 @@ public class FarmController {
     public ResponseEntity<FarmResponse> updateFarm(
             @PathVariable Long id,
             @RequestBody Farm farm) {
+
+        ownershipGuard.requireFarm(id);
+        validate(farm);
 
         Farm updatedFarm = farmService.updateFarm(id, farm);
 
@@ -105,6 +120,8 @@ public class FarmController {
     public ResponseEntity<String> deleteFarm(
             @PathVariable Long id) {
 
+        ownershipGuard.requireFarm(id);
+
         boolean deleted = farmService.deleteFarm(id);
 
         if (!deleted) {
@@ -118,6 +135,26 @@ public class FarmController {
                 "Farm deleted successfully",
                 HttpStatus.OK
         );
+    }
+
+    private void validate(Farm farm) {
+
+        if (farm == null
+                || isBlank(farm.getFarmName())
+                || isBlank(farm.getLocation())
+                || isBlank(farm.getCrop())
+                || farm.getArea() == null) {
+            throw new InvalidRequestException(
+                    "Farm name, location, area and crop are required");
+        }
+
+        if (farm.getArea() <= 0) {
+            throw new InvalidRequestException("Area must be greater than 0");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private FarmResponse convertToResponse(Farm farm) {

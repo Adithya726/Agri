@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.agrisense.backend.dto.ConstraintValidationRequest;
 import com.agrisense.backend.dto.ConstraintValidationResponse;
+import com.agrisense.backend.security.OwnershipGuard;
 import com.agrisense.backend.service.ConstraintValidationService;
 
 @RestController
@@ -20,12 +21,16 @@ public class ConstraintValidationController {
     private final ConstraintValidationService
             constraintValidationService;
 
+    private final OwnershipGuard ownershipGuard;
+
     public ConstraintValidationController(
             ConstraintValidationService
-                    constraintValidationService) {
+                    constraintValidationService,
+            OwnershipGuard ownershipGuard) {
 
         this.constraintValidationService =
                 constraintValidationService;
+        this.ownershipGuard = ownershipGuard;
     }
 
     @PostMapping("/validate")
@@ -33,6 +38,11 @@ public class ConstraintValidationController {
             validateAction(
                     @RequestBody
                     ConstraintValidationRequest request) {
+
+        // A missing farmId is reported by the service as before.
+        if (request != null && request.getFarmId() != null) {
+            ownershipGuard.requireFarm(request.getFarmId());
+        }
 
         ConstraintValidationResponse response =
                 constraintValidationService

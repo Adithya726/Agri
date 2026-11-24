@@ -77,6 +77,12 @@ public class FarmStateServiceImpl implements FarmStateService {
     }
 
     @Override
+    public List<FarmState> getFarmStatesByFarmerId(Long farmerId) {
+
+        return farmStateRepository.findByFarmFarmerId(farmerId);
+    }
+
+    @Override
     public FarmState getFarmStateById(Long id) {
 
         return farmStateRepository.findById(id).orElse(null);

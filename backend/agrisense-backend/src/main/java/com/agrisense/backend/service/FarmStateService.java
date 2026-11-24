@@ -10,6 +10,8 @@ public interface FarmStateService {
 
     List<FarmState> getAllFarmStates();
 
+    List<FarmState> getFarmStatesByFarmerId(Long farmerId);
+
     FarmState getFarmStateById(Long id);
 
     FarmState getFarmStateByFarmId(Long farmId);
