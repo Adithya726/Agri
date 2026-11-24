@@ -106,6 +106,18 @@ public class ActionPlanServiceImpl implements ActionPlanService {
                                 java.util.stream.Collectors.toCollection(
                                         ArrayList::new));
 
+        // Nothing sourced applies: say so instead of saving an empty plan.
+        if (actions.isEmpty()) {
+            throw new IllegalStateException(
+                    "No reference-supported agricultural actions are available for "
+                            + farmState.getCrop().trim() + " at growth stage "
+                            + (farmState.getGrowthStage() == null
+                                    || farmState.getGrowthStage().trim().isEmpty()
+                                    ? "(not set)"
+                                    : farmState.getGrowthStage().trim())
+                            + ". No plan was created.");
+        }
+
         ActionPlan plan = new ActionPlan();
         plan.setFarm(farm);
         plan.setStatus("DRAFT");
@@ -165,6 +177,31 @@ public class ActionPlanServiceImpl implements ActionPlanService {
                 + String.join(" ", ranked.reasons());
 
         return text.length() <= 1000 ? text : text.substring(0, 997) + "...";
+    }
+
+    // planMessage stores "DECISION: reasons"; read the decision back.
+    // Items saved before the decision engine have no such prefix.
+    static String decisionOf(String validationMessage) {
+
+        if (validationMessage == null) {
+            return null;
+        }
+
+        int colon = validationMessage.indexOf(':');
+
+        if (colon <= 0) {
+            return null;
+        }
+
+        String prefix = validationMessage.substring(0, colon).trim();
+
+        return switch (prefix) {
+            case ActionPrioritizer.RECOMMENDED,
+                    ActionPrioritizer.DEFERRED,
+                    ActionPrioritizer.NEEDS_DATA,
+                    ActionPrioritizer.REJECTED -> prefix;
+            default -> null;
+        };
     }
 
     // Get one action plan by ID.
@@ -246,6 +283,10 @@ public class ActionPlanServiceImpl implements ActionPlanService {
                         item.getSequenceOrder(),
                         item.getValidationStatus(),
                         item.getValidationMessage()
+                ).withEvidence(
+                        decisionOf(item.getValidationMessage()),
+                        item.getAgriculturalAction().getEvidenceStatus(),
+                        item.getAgriculturalAction().getSourceReference()
                 ))
                 .toList();
 

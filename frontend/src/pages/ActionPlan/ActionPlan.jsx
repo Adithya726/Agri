@@ -446,6 +446,13 @@ function ActionPlan() {
 
                                                             <div className="plan-item-head">
                                                                 <h4>{item.actionName || "—"}</h4>
+                                                                {item.decision && (
+                                                                    <span
+                                                                        className={`decision-badge decision-${statusClass(item.decision)}`}
+                                                                    >
+                                                                        {item.decision.replace("_", " ")}
+                                                                    </span>
+                                                                )}
                                                                 <span
                                                                     className={`validation-badge validation-${statusClass(item.validationStatus)}`}
                                                                 >
@@ -466,6 +473,13 @@ function ActionPlan() {
                                                             {item.validationMessage && (
                                                                 <p className="plan-item-message">
                                                                     {item.validationMessage}
+                                                                </p>
+                                                            )}
+
+                                                            {item.sourceReference && (
+                                                                <p className="plan-item-source">
+                                                                    <strong>{t("sourceReference")}:</strong>{" "}
+                                                                    {item.sourceReference}
                                                                 </p>
                                                             )}
 

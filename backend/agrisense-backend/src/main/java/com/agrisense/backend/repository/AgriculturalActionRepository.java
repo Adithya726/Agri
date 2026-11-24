@@ -16,4 +16,9 @@ public interface AgriculturalActionRepository
     List<AgriculturalAction> findByApplicableCropAndApplicableGrowthStageAndActiveTrue(
             String applicableCrop,
             String applicableGrowthStage);
+
+    boolean existsByActionNameIgnoreCaseAndApplicableCropIgnoreCaseAndApplicableGrowthStageIgnoreCase(
+            String actionName,
+            String applicableCrop,
+            String applicableGrowthStage);
 }

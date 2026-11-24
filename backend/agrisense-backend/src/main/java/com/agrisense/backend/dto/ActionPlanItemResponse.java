@@ -11,6 +11,11 @@ public class ActionPlanItemResponse {
     private String validationStatus;
     private String validationMessage;
 
+    // Added in Phase G; existing fields are unchanged.
+    private String decision;
+    private String evidenceStatus;
+    private String sourceReference;
+
     public ActionPlanItemResponse() {
     }
 
@@ -64,5 +69,28 @@ public class ActionPlanItemResponse {
 
     public String getValidationMessage() {
         return validationMessage;
+    }
+
+    public String getDecision() {
+        return decision;
+    }
+
+    public String getEvidenceStatus() {
+        return evidenceStatus;
+    }
+
+    public String getSourceReference() {
+        return sourceReference;
+    }
+
+    // Decision engine outcome and the action's evidence, for display.
+    public ActionPlanItemResponse withEvidence(
+            String decision,
+            String evidenceStatus,
+            String sourceReference) {
+        this.decision = decision;
+        this.evidenceStatus = evidenceStatus;
+        this.sourceReference = sourceReference;
+        return this;
     }
 }
