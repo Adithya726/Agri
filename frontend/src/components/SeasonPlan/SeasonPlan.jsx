@@ -53,6 +53,28 @@ const range = (min, max, digits = 1) =>
 
 const rupees = (min, max) => `₹${range(min, max, 0)}`;
 
+const DUE_KEYS = {
+    DUE_NOW: "dueNow",
+    COMING: "dueComing",
+    PASSED: "duePassed",
+    STARTED: "dueStarted",
+    ADD_DATE: "dueAddDate",
+    BY_STAGE: "dueByStage"
+};
+
+// When the step falls due on this farm, from the guide's day count and
+// the farm's sowing or transplanting date.
+function DueLine({ due, t }) {
+    if (!due) {
+        return null;
+    }
+    return (
+        <p className={`season-due season-due-${cls(due.status)}`}>
+            <strong>{t(DUE_KEYS[due.status] || "dueByStage")}:</strong> {due.sentence}
+        </p>
+    );
+}
+
 const isLink = (value) => typeof value === "string" && value.startsWith("http");
 
 function SourceLink({ url, t }) {
@@ -202,6 +224,7 @@ function StepCard({ step, t }) {
                 {step.category && (
                     <span className="season-step-category">{step.category}</span>
                 )}
+                <DueLine due={step.due} t={t} />
                 {step.instruction && <p className="season-step-instruction">{step.instruction}</p>}
 
                 {step.why?.length > 0 && (
@@ -305,6 +328,10 @@ function SeasonPlan({ farmId }) {
                             {plan.crop}{plan.variety ? ` (${plan.variety})` : ""}
                             {plan.growthStage ? ` · ${plan.growthStage}` : ""}
                             {plan.season ? ` · ${plan.season} ${t("season")}` : ""}
+                            {plan.cropDays?.daysAfterSowing != null
+                                ? ` · ${fill(t("dayAfterSowing"), { day: plan.cropDays.daysAfterSowing })}` : ""}
+                            {plan.cropDays?.daysAfterTransplanting != null
+                                ? ` · ${fill(t("dayAfterTransplanting"), { day: plan.cropDays.daysAfterTransplanting })}` : ""}
                         </small>
                     </div>
 
@@ -385,6 +412,11 @@ function SeasonPlan({ farmId }) {
                                                     <li key={s.actionId} className={s.completed ? "season-done" : ""}
                                                         title={s.instruction}>
                                                         {s.completed ? "✓ " : ""}{s.name}
+                                                        {s.due?.from && !s.completed && (
+                                                            <small className={`season-stage-due season-due-${cls(s.due.status)}`}>
+                                                                {" "}· {t(DUE_KEYS[s.due.status])} {s.due.from}
+                                                            </small>
+                                                        )}
                                                         {s.requirements?.cost?.max > 0 && (
                                                             <small className="season-stage-cost">
                                                                 {" "}· {rupees(s.requirements.cost.min, s.requirements.cost.max)}

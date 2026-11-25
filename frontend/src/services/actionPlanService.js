@@ -8,6 +8,16 @@ export const generateActionPlan = async (farmId) => {
     return response.data;
 };
 
+// The plan for the farm as it is now: the backend makes a new draft
+// when the farm state was saved after the latest plan.
+export const getCurrentActionPlan = async (farmId) => {
+    const response = await api.get(
+        `/actionplanapi/current/${farmId}`
+    );
+
+    return response.data;
+};
+
 export const getActionPlanById = async (planId) => {
     const response = await api.get(
         `/actionplanapi/${planId}`

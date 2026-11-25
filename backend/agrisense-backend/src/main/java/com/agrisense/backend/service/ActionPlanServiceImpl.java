@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +21,11 @@ import com.agrisense.backend.model.ActionPlanItem;
 import com.agrisense.backend.model.AgriculturalAction;
 import com.agrisense.backend.model.Farm;
 import com.agrisense.backend.model.FarmState;
+import com.agrisense.backend.model.FarmStateReading;
 import com.agrisense.backend.repository.ActionPlanRepository;
 import com.agrisense.backend.repository.AgriculturalActionRepository;
 import com.agrisense.backend.repository.FarmRepository;
+import com.agrisense.backend.repository.FarmStateReadingRepository;
 import com.agrisense.backend.repository.FarmStateRepository;
 
 @Service
@@ -38,6 +41,10 @@ public class ActionPlanServiceImpl implements ActionPlanService {
 
     private final ActionPrioritizer actionPrioritizer;
 
+    // Saved farm readings: tell when the farm state last changed and
+    // what the crop and stage were when a plan was made.
+    private final FarmStateReadingRepository readingRepository;
+
     public ActionPlanServiceImpl(
             ActionPlanRepository actionPlanRepository,
             AgriculturalActionRepository agriculturalActionRepository,
@@ -46,6 +53,22 @@ public class ActionPlanServiceImpl implements ActionPlanService {
             ConstraintValidationService constraintValidationService,
             RiskAnalysisService riskAnalysisService,
             ActionPrioritizer actionPrioritizer) {
+
+        this(actionPlanRepository, agriculturalActionRepository, farmRepository,
+                farmStateRepository, constraintValidationService, riskAnalysisService,
+                actionPrioritizer, null);
+    }
+
+    @Autowired
+    public ActionPlanServiceImpl(
+            ActionPlanRepository actionPlanRepository,
+            AgriculturalActionRepository agriculturalActionRepository,
+            FarmRepository farmRepository,
+            FarmStateRepository farmStateRepository,
+            ConstraintValidationService constraintValidationService,
+            RiskAnalysisService riskAnalysisService,
+            ActionPrioritizer actionPrioritizer,
+            FarmStateReadingRepository readingRepository) {
 
         this.actionPlanRepository = actionPlanRepository;
         this.agriculturalActionRepository = agriculturalActionRepository;
@@ -56,6 +79,48 @@ public class ActionPlanServiceImpl implements ActionPlanService {
         this.riskAnalysisService = riskAnalysisService;
 
         this.actionPrioritizer = actionPrioritizer;
+        this.readingRepository = readingRepository;
+    }
+
+    // The plan for the farm as it is now: the latest saved plan, or a
+    // new draft when the farm state was saved after that plan was made
+    // (or no plan exists yet). If no new plan can be made, the latest
+    // saved one is returned.
+    @Override
+    @Transactional
+    public ActionPlanResponse currentPlan(Long farmId) {
+
+        if (farmId == null) {
+            throw new IllegalArgumentException("Farm ID is required.");
+        }
+
+        ActionPlan latest = actionPlanRepository
+                .findByFarmIdOrderByCreatedAtDesc(farmId)
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        LocalDateTime stateSavedAt = readingRepository == null ? null
+                : readingRepository.findFirstByFarmIdOrderByRecordedAtDesc(farmId)
+                        .map(FarmStateReading::getRecordedAt)
+                        .orElse(null);
+
+        boolean stale = latest == null
+                || (stateSavedAt != null && latest.getCreatedAt() != null
+                        && stateSavedAt.isAfter(latest.getCreatedAt()));
+
+        if (!stale) {
+            return convertToResponse(latest);
+        }
+
+        try {
+            return generateDraft(farmId);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            if (latest != null) {
+                return convertToResponse(latest);
+            }
+            throw e;
+        }
     }
 
     // Generate a draft action plan for a farm
@@ -303,16 +368,37 @@ public class ActionPlanServiceImpl implements ActionPlanService {
                 ))
                 .toList();
 
+        // Crop and stage as the farm state had them when the plan was
+        // made; the farm record is the fallback for older plans.
+        String crop = plan.getFarm().getCrop();
+        String stage = plan.getFarm().getGrowthStage();
+        FarmStateReading atPlan = readingAt(plan);
+        if (atPlan != null) {
+            crop = atPlan.getCrop() != null ? atPlan.getCrop() : crop;
+            stage = atPlan.getGrowthStage() != null ? atPlan.getGrowthStage() : stage;
+        }
+
         return new ActionPlanResponse(
                 plan.getId(),
                 plan.getFarm().getId(),
                 plan.getFarm().getFarmName(),
-                plan.getFarm().getCrop(),
-                plan.getFarm().getGrowthStage(),
+                crop,
+                stage,
                 plan.getStatus(),
                 plan.getCreatedAt(),
                 plan.getReviewedAt(),
                 itemResponses
         );
+    }
+
+    private FarmStateReading readingAt(ActionPlan plan) {
+        if (readingRepository == null || plan.getFarm() == null
+                || plan.getFarm().getId() == null || plan.getCreatedAt() == null) {
+            return null;
+        }
+        return readingRepository
+                .findFirstByFarmIdAndRecordedAtLessThanOrderByRecordedAtDesc(
+                        plan.getFarm().getId(), plan.getCreatedAt().plusSeconds(1))
+                .orElse(null);
     }
 }

@@ -1,6 +1,8 @@
 package com.agrisense.backend.service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ import com.agrisense.backend.dto.SeasonPlanResponse;
 import com.agrisense.backend.dto.StepRequirements;
 import com.agrisense.backend.dto.SeasonPlanResponse.Alert;
 import com.agrisense.backend.dto.SeasonPlanResponse.Change;
+import com.agrisense.backend.dto.SeasonPlanResponse.CropDays;
+import com.agrisense.backend.dto.SeasonPlanResponse.Due;
 import com.agrisense.backend.dto.SeasonPlanResponse.StagePlan;
 import com.agrisense.backend.dto.SeasonPlanResponse.StageStep;
 import com.agrisense.backend.dto.SeasonPlanResponse.Step;
@@ -124,7 +128,9 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
         }
 
         String stage = canonicalStage(state.getGrowthStage());
-        String season = seasonFor(LocalDate.now(ZoneId.of("Asia/Kolkata")));
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+        String season = seasonFor(today);
+        CropDays cropDays = cropDays(state, today);
         List<String> notes = new ArrayList<>();
 
         // All sourced steps for this crop, across the season.
@@ -145,7 +151,7 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
                     "No ANGRAU steps are stored for " + crop + " yet, so no plan can be built."
                             + " Plans are available for rice and maize.",
                     List.of(), List.of(), List.of(), changes, changesSince, missing, List.of(),
-                    List.of(LOCAL_HELP));
+                    List.of(LOCAL_HELP), cropDays);
         }
 
         // Whole-season timeline.
@@ -155,9 +161,12 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
             String s = STAGES.get(i);
             List<StageStep> steps = cropActions.stream()
                     .filter(a -> s.equalsIgnoreCase(a.getApplicableGrowthStage().trim()))
-                    .map(a -> new StageStep(a.getId(), a.getActionName(), a.getCategory(),
-                            a.getDescription(), completed.contains(a.getId()), a.getSourceReference(),
-                            requirements(a, farm, season)))
+                    .map(a -> {
+                        StepRequirements req = requirements(a, farm, season);
+                        return new StageStep(a.getId(), a.getActionName(), a.getCategory(),
+                                a.getDescription(), completed.contains(a.getId()), a.getSourceReference(),
+                                req, due(req, state, today));
+                    })
                     .toList();
             String status = currentIndex < 0 ? "UPCOMING"
                     : i < currentIndex ? "DONE"
@@ -188,9 +197,10 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
 
             for (RankedAction r : actionPrioritizer.prioritize(candidates, risk, state).actions()) {
                 AgriculturalAction a = byId.get(r.actionId());
+                StepRequirements req = requirements(a, farm, season);
                 Step step = new Step(r.sequence(), a.getId(), a.getActionName(), a.getCategory(),
                         a.getDescription(), plainDecision(r.decision()), r.reasons(),
-                        r.constraints(), a.getSourceReference(), requirements(a, farm, season));
+                        r.constraints(), a.getSourceReference(), req, due(req, state, today));
                 if (ActionPrioritizer.RECOMMENDED.equals(r.decision())) {
                     doNow.add(step);
                 } else {
@@ -205,6 +215,8 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
                     + (stageHasSteps(stages, currentIndex) ? "already done." : "not listed in the guide.")
                     + (next == null ? "" : " Your next steps start at the " + next + " stage."));
         }
+
+        notes.addAll(dateNotes(crop, state, stages));
 
         List<Alert> alerts = alerts(risk, doNow, onHold);
 
@@ -231,7 +243,104 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
 
         return new SeasonPlanResponse(farmId, farm.getFarmName(), farm.getLocation(), crop,
                 farm.getVariety(), stage, season, LocalDateTime.now(), status, headline,
-                doNow, onHold, alerts, changes, changesSince, missing, stages, notes);
+                doNow, onHold, alerts, changes, changesSince, missing, stages, notes, cropDays);
+    }
+
+    // ------------------------------------------------------------------
+    // Dates: the guide's day counts turned into calendar dates for this
+    // farm. Nothing here is estimated: a step with no day count in the
+    // guide, or a farm with no date, says so instead.
+
+    private static final DateTimeFormatter DAY =
+            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+
+    static CropDays cropDays(FarmState state, LocalDate today) {
+        LocalDate sown = state.getSowingDate();
+        LocalDate planted = state.getTransplantingDate();
+        return new CropDays(sown, sown == null ? null : (int) ChronoUnit.DAYS.between(sown, today),
+                planted, planted == null ? null : (int) ChronoUnit.DAYS.between(planted, today));
+    }
+
+    static Due due(StepRequirements req, FarmState state, LocalDate today) {
+        if (req == null || req.timing() == null) {
+            return null;
+        }
+        StepRequirements.Timing t = req.timing();
+        String text = t.text() == null ? "" : t.text().trim();
+        String countFrom = t.countFrom() == null ? "" : t.countFrom().toUpperCase(Locale.ROOT);
+
+        if (t.fromDay() == null) {
+            return new Due("BY_STAGE", null, null, text);
+        }
+
+        LocalDate anchor;
+        String word;
+        switch (countFrom) {
+            case "SOWING" -> { anchor = state.getSowingDate(); word = "sowing"; }
+            case "TRANSPLANTING" -> { anchor = state.getTransplantingDate(); word = "transplanting"; }
+            default -> {
+                // EMERGENCE: the day seedlings come up is not stored.
+                return new Due("BY_STAGE", null, null,
+                        text + ". Count the days from when the seedlings came up.");
+            }
+        }
+
+        if (anchor == null) {
+            return new Due("ADD_DATE", null, null, text + ". Add your " + word
+                    + " date on the Farm State page to see the exact date.");
+        }
+
+        LocalDate from = anchor.plusDays(t.fromDay());
+        LocalDate to = t.toDay() == null ? null : anchor.plusDays(t.toDay());
+        long day = ChronoUnit.DAYS.between(anchor, today);
+
+        if (today.isBefore(from)) {
+            long in = ChronoUnit.DAYS.between(today, from);
+            return new Due("COMING", from, to, "Due from " + DAY.format(from)
+                    + (in == 1 ? " (tomorrow)" : " (in " + in + " days)") + ". " + text + ".");
+        }
+        if (to != null && today.isAfter(to)) {
+            return new Due("PASSED", from, to, "The time for this ended on " + DAY.format(to)
+                    + ". " + text + ".");
+        }
+        if (to == null) {
+            // The guide gives a start but no end (for example "until the
+            // crop is established"), so it is not marked due now.
+            return new Due("STARTED", from, null, "Started on " + DAY.format(from)
+                    + "; today is day " + day + " after " + word + ". " + text + ".");
+        }
+        return new Due("DUE_NOW", from, to, "Due now: today is day " + day + " after " + word
+                + ", and the time for this ends on " + DAY.format(to) + ". "
+                + text + ".");
+    }
+
+    // Asks for missing dates, and points out steps of another stage that
+    // are due by date, so the farmer can check the crop's stage.
+    static List<String> dateNotes(String crop, FarmState state, List<StagePlan> stages) {
+        List<String> out = new ArrayList<>();
+        boolean rice = crop != null && crop.toLowerCase(Locale.ROOT).contains("rice");
+        if (state.getSowingDate() == null && (!rice || state.getTransplantingDate() == null)) {
+            out.add(rice
+                    ? "Add your sowing and transplanting dates on the Farm State page so each step shows its due date."
+                    : "Add your sowing date on the Farm State page so each step shows its due date.");
+        } else if (rice && state.getTransplantingDate() == null) {
+            out.add("Add your transplanting date on the Farm State page; most rice steps count from it.");
+        }
+        for (StagePlan p : stages) {
+            // Only later stages: a step of an earlier stage that is still
+            // open does not mean the crop has gone back.
+            if (!"UPCOMING".equals(p.status())) {
+                continue;
+            }
+            for (StageStep st : p.steps()) {
+                if (!st.completed() && st.due() != null && "DUE_NOW".equals(st.due().status())) {
+                    out.add("By date, \"" + st.name() + "\" (" + p.stage() + " stage) is due now."
+                            + " If your crop has reached the " + p.stage()
+                            + " stage, change Growth stage on the Farm State page.");
+                }
+            }
+        }
+        return out;
     }
 
     // ------------------------------------------------------------------

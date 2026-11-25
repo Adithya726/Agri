@@ -97,3 +97,10 @@
     .season-req-grid { grid-template-columns: 1fr; }
     .season-req-grid dt { margin-top: 6px; }
 }
+
+.season-due { margin: 6px 0 0; font-size: 13px; color: #4a5a52; }
+.season-due-due-now { color: #8a4b00; }
+.season-due-due-now strong { color: #b35c00; }
+.season-due-passed { color: #7a857f; }
+.season-stage-due { color: #5f6d66; }
+.season-stage-due.season-due-due-now { color: #b35c00; font-weight: 600; }

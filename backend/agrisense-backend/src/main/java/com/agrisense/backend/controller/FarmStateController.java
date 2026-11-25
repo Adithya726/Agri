@@ -135,7 +135,7 @@ public class FarmStateController {
 
     private FarmStateResponse convertToResponse(FarmState state) {
 
-        return new FarmStateResponse(
+        FarmStateResponse response = new FarmStateResponse(
                 state.getId(),
                 state.getFarm().getId(),
                 state.getCrop(),
@@ -154,4 +154,7 @@ public class FarmStateController {
                 state.getCropHealth(),
                 state.getDiseaseStatus()
         );
+        response.setSowingDate(state.getSowingDate());
+        response.setTransplantingDate(state.getTransplantingDate());
+        return response;
     }}

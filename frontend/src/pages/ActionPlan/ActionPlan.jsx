@@ -16,6 +16,7 @@ import {
     generateActionPlan,
     getActionPlanById,
     getActionPlansByFarmId,
+    getCurrentActionPlan,
     reviewActionPlan
 } from "../../services/actionPlanService";
 
@@ -128,19 +129,51 @@ function ActionPlan() {
             return;
         }
 
-        loadPlans(selectedFarmId).then((farmPlans) => {
+        let cancelled = false;
 
-            if (farmPlans.length > 0) {
+        loadPlans(selectedFarmId).then(async (farmPlans) => {
 
-                const latest = [...farmPlans].sort(
+            const latest = farmPlans.length > 0
+                ? [...farmPlans].sort(
                     (a, b) =>
                         new Date(b.createdAt) - new Date(a.createdAt)
-                )[0];
+                )[0]
+                : null;
 
-                setCurrentPlan(latest);
+            /*
+             * Ask for the plan as the farm is now: if the farm state
+             * changed since the latest plan, the backend makes a new one.
+             */
+            try {
+
+                const current = await getCurrentActionPlan(selectedFarmId);
+
+                if (cancelled) {
+                    return;
+                }
+
+                setCurrentPlan(current);
+
+                if (!farmPlans.some((p) => p.id === current?.id)) {
+                    toast.success(t("actionPlanUpdatedForState"));
+                    await loadPlans(selectedFarmId);
+                }
+
+            } catch {
+
+                // No farm state or no sourced steps yet: show the
+                // latest saved plan, if any, as before.
+                if (!cancelled && latest) {
+                    setCurrentPlan(latest);
+                }
             }
         });
 
+        return () => {
+            cancelled = true;
+        };
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedFarmId, loadPlans]);
 
 

@@ -58,6 +58,8 @@ const DISEASE_STATUS_OPTIONS = [
 const SUMMARY_FIELDS = [
     ["crop", "crop", ""],
     ["growthStage", "growthStage", ""],
+    ["sowingDate", "sowingDate", ""],
+    ["transplantingDate", "transplantingDate", ""],
     ["soilMoisture", "soilMoisture", "%"],
     ["soilPh", "soilPh", ""],
     ["nitrogen", "nitrogen", ""],
@@ -73,9 +75,24 @@ const SUMMARY_FIELDS = [
     ["diseaseStatus", "diseaseStatus", ""]
 ];
 
+// Today's date in India as yyyy-mm-dd, for the date inputs' max.
+const todayIso = () =>
+    new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+
 const validateFarmStateForm = (formData, t) => {
 
     const errors = {};
+
+    if (formData.sowingDate && formData.sowingDate > todayIso()) {
+        errors.sowingDate = t("dateInFuture");
+    }
+    if (formData.transplantingDate && formData.transplantingDate > todayIso()) {
+        errors.transplantingDate = t("dateInFuture");
+    }
+    if (formData.sowingDate && formData.transplantingDate
+            && formData.transplantingDate < formData.sowingDate) {
+        errors.transplantingDate = t("transplantBeforeSowing");
+    }
 
     Object.entries(NUMERIC_RULES).forEach(([field, rule]) => {
 
@@ -157,7 +174,9 @@ function FarmState() {
         budgetAvailable: "",
 
         cropHealth: "",
-        diseaseStatus: ""
+        diseaseStatus: "",
+        sowingDate: "",
+        transplantingDate: ""
     });
 
 
@@ -193,7 +212,9 @@ function FarmState() {
             budgetAvailable: "",
 
             cropHealth: "",
-            diseaseStatus: ""
+            diseaseStatus: "",
+        sowingDate: "",
+        transplantingDate: ""
 
         });
     };
@@ -262,7 +283,9 @@ function FarmState() {
                     budgetAvailable: data.budgetAvailable ?? "",
 
                     cropHealth: data.cropHealth || "",
-                    diseaseStatus: data.diseaseStatus || ""
+                    diseaseStatus: data.diseaseStatus || "",
+                    sowingDate: data.sowingDate || "",
+                    transplantingDate: data.transplantingDate || ""
 
                 });
 
@@ -347,7 +370,9 @@ function FarmState() {
             budgetAvailable: "",
 
             cropHealth: "",
-            diseaseStatus: ""
+            diseaseStatus: "",
+        sowingDate: "",
+        transplantingDate: ""
 
         });
     };
@@ -487,7 +512,13 @@ function FarmState() {
                     formData.cropHealth.trim() || null,
 
                 diseaseStatus:
-                    formData.diseaseStatus.trim() || null
+                    formData.diseaseStatus.trim() || null,
+
+                sowingDate:
+                    formData.sowingDate || null,
+
+                transplantingDate:
+                    formData.transplantingDate || null
 
             };
 
@@ -905,6 +936,63 @@ function FarmState() {
                                             {errors.growthStage && (
                                                 <small className="state-field-error">
                                                     {errors.growthStage}
+                                                </small>
+                                            )}
+
+                                        </div>
+
+
+                                        <div className="state-form-group">
+
+                                            <label>
+                                                {t("sowingDate")}
+                                            </label>
+
+                                            <input
+                                                type="date"
+                                                name="sowingDate"
+                                                aria-invalid={Boolean(errors.sowingDate)}
+                                                value={formData.sowingDate}
+                                                onChange={handleChange}
+                                                max={todayIso()}
+                                            />
+
+                                            <small>
+                                                {t("sowingDateHint")}
+                                            </small>
+
+                                            {errors.sowingDate && (
+                                                <small className="state-field-error">
+                                                    {errors.sowingDate}
+                                                </small>
+                                            )}
+
+                                        </div>
+
+
+                                        <div className="state-form-group">
+
+                                            <label>
+                                                {t("transplantingDate")}
+                                            </label>
+
+                                            <input
+                                                type="date"
+                                                name="transplantingDate"
+                                                aria-invalid={Boolean(errors.transplantingDate)}
+                                                value={formData.transplantingDate}
+                                                onChange={handleChange}
+                                                min={formData.sowingDate || undefined}
+                                                max={todayIso()}
+                                            />
+
+                                            <small>
+                                                {t("transplantingDateHint")}
+                                            </small>
+
+                                            {errors.transplantingDate && (
+                                                <small className="state-field-error">
+                                                    {errors.transplantingDate}
                                                 </small>
                                             )}
 

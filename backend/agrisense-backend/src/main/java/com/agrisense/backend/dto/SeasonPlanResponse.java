@@ -1,5 +1,6 @@
 package com.agrisense.backend.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,8 +35,35 @@ public record SeasonPlanResponse(
         LocalDateTime changesSince,
         List<String> missingDetails,
         List<StagePlan> stages,
-        List<String> notes
+        List<String> notes,
+        CropDays cropDays
 ) {
+
+    // The farm's sowing and transplanting dates and how many days have
+    // passed since each, counted on today's date in India. Null parts
+    // mean the farmer has not added that date.
+    public record CropDays(
+            LocalDate sowingDate,
+            Integer daysAfterSowing,
+            LocalDate transplantingDate,
+            Integer daysAfterTransplanting
+    ) {}
+
+    // When a step falls due on this farm, worked out from the guide's
+    // day count and the farm's sowing or transplanting date.
+    // status is one of:
+    //  DUE_NOW      - today is inside the step's window;
+    //  COMING       - the window starts later (from is its first day);
+    //  PASSED       - the window has ended;
+    //  STARTED      - the window has started and the guide gives no end;
+    //  ADD_DATE     - the farm's sowing or transplanting date is missing;
+    //  BY_STAGE     - the guide gives a crop stage, not a day count.
+    public record Due(
+            String status,
+            LocalDate from,
+            LocalDate to,
+            String sentence
+    ) {}
 
     // One step to follow. why is plain language; checks are the
     // constraint results the step passed or failed.
@@ -49,7 +77,8 @@ public record SeasonPlanResponse(
             List<String> why,
             List<ConstraintResult> checks,
             String source,
-            StepRequirements requirements
+            StepRequirements requirements,
+            Due due
     ) {}
 
     // A reading that needs attention, what it means, and what to do.
@@ -83,6 +112,7 @@ public record SeasonPlanResponse(
             String instruction,
             boolean completed,
             String source,
-            StepRequirements requirements
+            StepRequirements requirements,
+            Due due
     ) {}
 }

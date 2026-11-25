@@ -91,6 +91,8 @@ public class FarmStateServiceImpl implements FarmStateService {
 
             existingState.setCropHealth(farmState.getCropHealth());
             existingState.setDiseaseStatus(farmState.getDiseaseStatus());
+            existingState.setSowingDate(farmState.getSowingDate());
+            existingState.setTransplantingDate(farmState.getTransplantingDate());
 
             return recorded(farmStateRepository.save(existingState));
         }
@@ -171,6 +173,8 @@ public class FarmStateServiceImpl implements FarmStateService {
 
         existingState.setCropHealth(farmState.getCropHealth());
         existingState.setDiseaseStatus(farmState.getDiseaseStatus());
+        existingState.setSowingDate(farmState.getSowingDate());
+        existingState.setTransplantingDate(farmState.getTransplantingDate());
 
         return recorded(farmStateRepository.save(existingState));
     }

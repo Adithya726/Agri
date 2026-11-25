@@ -56,10 +56,28 @@ public final class FarmStateValidator {
         text(errors, "cropHealth", "Crop health", state.getCropHealth());
         text(errors, "diseaseStatus", "Disease status", state.getDiseaseStatus());
 
+        dates(errors, state);
+
         if (!errors.isEmpty()) {
             throw new InvalidRequestException(
                     "Invalid farm state: " + String.join("; ", errors.values()),
                     errors);
+        }
+    }
+
+    // Sowing and transplanting dates cannot be in the future, and a
+    // crop cannot be transplanted before it was sown.
+    private static void dates(Map<String, String> errors, FarmState state) {
+        java.time.LocalDate today = java.time.LocalDate.now(java.time.ZoneId.of("Asia/Kolkata"));
+        if (state.getSowingDate() != null && state.getSowingDate().isAfter(today)) {
+            errors.put("sowingDate", "Sowing date cannot be in the future");
+        }
+        if (state.getTransplantingDate() != null && state.getTransplantingDate().isAfter(today)) {
+            errors.put("transplantingDate", "Transplanting date cannot be in the future");
+        }
+        if (state.getSowingDate() != null && state.getTransplantingDate() != null
+                && state.getTransplantingDate().isBefore(state.getSowingDate())) {
+            errors.put("transplantingDate", "Transplanting date cannot be before the sowing date");
         }
     }
 
