@@ -49,13 +49,13 @@ function ConstraintValidation() {
     const [validating, setValidating] = useState(false);
 
     // Display missing values honestly instead of treating them as zero.
-    const displayValue = (value, unit = "") => {
+    const displayValue = (value, unit = "", empty = "Not added yet") => {
         if (
             value === null ||
             value === undefined ||
             value === ""
         ) {
-            return "Unknown";
+            return empty;
         }
 
         return `${value}${unit ? ` ${unit}` : ""}`;
@@ -571,7 +571,8 @@ function ConstraintValidation() {
                                                         item.required,
                                                         item.key === "budget"
                                                             ? ""
-                                                            : item.unit
+                                                            : item.unit,
+                                                        "As written in the step"
                                                     )}
                                                     {item.key === "budget" &&
                                                         item.required != null &&
