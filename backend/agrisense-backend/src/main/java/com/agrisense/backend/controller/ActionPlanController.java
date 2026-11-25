@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.agrisense.backend.dto.ActionPlanResponse;
 import com.agrisense.backend.security.OwnershipGuard;
 import com.agrisense.backend.service.ActionPlanService;
+import com.agrisense.backend.service.SeasonPlanService;
 
 @RestController
 @RequestMapping("/actionplanapi")
@@ -17,11 +18,22 @@ public class ActionPlanController {
 
     private final ActionPlanService actionPlanService;
     private final OwnershipGuard ownershipGuard;
+    private final SeasonPlanService seasonPlanService;
 
     public ActionPlanController(ActionPlanService actionPlanService,
-                                OwnershipGuard ownershipGuard) {
+                                OwnershipGuard ownershipGuard,
+                                SeasonPlanService seasonPlanService) {
         this.actionPlanService = actionPlanService;
         this.ownershipGuard = ownershipGuard;
+        this.seasonPlanService = seasonPlanService;
+    }
+
+    // Whole-season plan, re-decided from the farm's latest state:
+    // what to do now, what is on hold and why, and every stage to harvest.
+    @GetMapping("/season/{farmId}")
+    public ResponseEntity<?> seasonPlan(@PathVariable Long farmId) {
+        ownershipGuard.requireFarm(farmId);
+        return ResponseEntity.ok(seasonPlanService.buildSeasonPlan(farmId));
     }
 
     // Generate a draft action plan for a farm

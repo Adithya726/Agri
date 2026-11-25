@@ -10,6 +10,7 @@ import LanguageSelector from "../../components/LanguageSelector/LanguageSelector
 
 import { FarmListState } from "../../components/PageState/PageState";
 import useFarmerFarms from "../../hooks/useFarmerFarms";
+import SeasonPlan from "../../components/SeasonPlan/SeasonPlan";
 
 import {
     generateActionPlan,
@@ -310,6 +311,9 @@ function ActionPlan() {
                         </section>
 
 
+                        <SeasonPlan farmId={selectedFarmId} />
+
+
                         <div className="action-plan-grid">
 
                             {/* Current plan */}
@@ -417,7 +421,7 @@ function ActionPlan() {
                                                                 <span
                                                                     className={`validation-badge validation-${statusClass(item.validationStatus)}`}
                                                                 >
-                                                                    {item.validationStatus || "UNKNOWN"}
+                                                                    {item.validationStatus || "NOT_CHECKED"}
                                                                 </span>
                                                             </div>
 

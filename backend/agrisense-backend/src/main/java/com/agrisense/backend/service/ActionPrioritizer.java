@@ -114,15 +114,15 @@ public class ActionPrioritizer {
             if (!"FEASIBLE".equals(status)) {
                 w.decision = NEEDS_DATA;
                 for (ConstraintResult c : constraints(candidate.validation())) {
-                    if (!"FEASIBLE".equalsIgnoreCase(c.getStatus())) {
-                        w.reasons.add("Cannot confirm " + c.getCategory() + ": " + c.getMessage());
+                    if ("NEEDS_INPUT".equalsIgnoreCase(c.getStatus())) {
+                        w.reasons.add("Needs your " + label(c.getCategory()) + ": " + c.getMessage());
                         w.dependencies.add(new Dependency("DATA", null,
-                                c.getCategory() + " must be known before this action can be scheduled. "
+                                "Add your " + label(c.getCategory()) + " before this step can be scheduled. "
                                         + c.getMessage()));
                     }
                 }
                 if (w.reasons.isEmpty()) {
-                    w.reasons.add("Validation incomplete: " + message(candidate.validation()));
+                    w.reasons.add("Needs more farm details: " + message(candidate.validation()));
                 }
                 needsData.add(w);
                 continue;
@@ -189,7 +189,7 @@ public class ActionPrioritizer {
                     action.getRequiredLabour() == null ? 0 : action.getRequiredLabour());
 
             w.decision = RECOMMENDED;
-            w.reasons.add("All crop, growth-stage, water, labour and budget checks passed.");
+            w.reasons.add(passedSummary(candidate(w)));
             if (!scheduled.isEmpty()) {
                 Working previous = scheduled.get(scheduled.size() - 1);
                 w.dependencies.add(new Dependency("SEQUENCE",
@@ -305,9 +305,48 @@ public class ActionPrioritizer {
         }
     }
 
+    private static ConstraintValidationResponse candidate(Working w) {
+        return w.candidate.validation();
+    }
+
+    // Plain-language summary of the checks a recommended step passed.
+    static String passedSummary(ConstraintValidationResponse v) {
+        List<String> checked = new ArrayList<>();
+        List<String> guide = new ArrayList<>();
+        for (ConstraintResult c : constraints(v)) {
+            if ("FEASIBLE".equalsIgnoreCase(c.getStatus())) {
+                checked.add(label(c.getCategory()));
+            } else if ("FIELD_GUIDE".equalsIgnoreCase(c.getStatus())) {
+                guide.add(label(c.getCategory()));
+            }
+        }
+        String text = checked.isEmpty()
+                ? "No conflicts found."
+                : "Fits your " + String.join(", ", checked) + ".";
+        if (!guide.isEmpty()) {
+            text += " The ANGRAU guide sets no separate " + String.join(", ", guide)
+                    + " figure; use the amounts written in the step.";
+        }
+        return text;
+    }
+
+    static String label(String category) {
+        if (category == null) {
+            return "details";
+        }
+        return switch (category.toUpperCase(Locale.ROOT)) {
+            case "CROP_APPLICABILITY" -> "crop";
+            case "GROWTH_STAGE_APPLICABILITY" -> "growth stage";
+            case "WATER" -> "water";
+            case "LABOUR" -> "labour";
+            case "BUDGET" -> "budget";
+            default -> category.toLowerCase(Locale.ROOT).replace('_', ' ');
+        };
+    }
+
     private static String validationStatus(ConstraintValidationResponse v) {
         return v == null || v.getOverallStatus() == null
-                ? "UNKNOWN"
+                ? "NOT_CHECKED"
                 : v.getOverallStatus().toUpperCase(Locale.ROOT);
     }
 

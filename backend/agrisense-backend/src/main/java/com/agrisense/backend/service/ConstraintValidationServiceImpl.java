@@ -127,11 +127,11 @@ public class ConstraintValidationServiceImpl
         String message;
 
         if ("FEASIBLE".equals(overallStatus)) {
-            message = "All applicability and resource checks passed.";
+            message = "This step fits your crop, stage and resources.";
         } else if ("INFEASIBLE".equals(overallStatus)) {
             message = "One or more constraints are not satisfied.";
         } else {
-            message = "Validation is incomplete because some information is unavailable.";
+            message = "Some of your farm details are missing. Add them on the Farm State page.";
         }
 
         return new ConstraintValidationResponse(
@@ -154,16 +154,16 @@ public class ConstraintValidationServiceImpl
         if (requiredCrop == null) {
             constraints.add(new ConstraintResult(
                     "CROP_APPLICABILITY",
-                    "UNKNOWN",
-                    "The action's applicable crop is not specified."));
+                    "NEEDS_INPUT",
+                    "This step has no crop set. An admin must correct the action data."));
             return;
         }
 
         if (currentCrop == null) {
             constraints.add(new ConstraintResult(
                     "CROP_APPLICABILITY",
-                    "UNKNOWN",
-                    "The farm's current crop is not available."));
+                    "NEEDS_INPUT",
+                    "Add your current crop on the Farm State page."));
             return;
         }
 
@@ -192,16 +192,16 @@ public class ConstraintValidationServiceImpl
         if (requiredStage == null) {
             constraints.add(new ConstraintResult(
                     "GROWTH_STAGE_APPLICABILITY",
-                    "UNKNOWN",
-                    "The action's applicable growth stage is not specified."));
+                    "NEEDS_INPUT",
+                    "This step has no growth stage set. An admin must correct the action data."));
             return;
         }
 
         if (currentStage == null) {
             constraints.add(new ConstraintResult(
                     "GROWTH_STAGE_APPLICABILITY",
-                    "UNKNOWN",
-                    "The farm's current growth stage is not available."));
+                    "NEEDS_INPUT",
+                    "Add your crop's growth stage on the Farm State page."));
             return;
         }
 
@@ -231,7 +231,7 @@ public class ConstraintValidationServiceImpl
         if (required != null && !isValidRequirement(required)) {
             constraints.add(new ConstraintResult(
                     "WATER",
-                    "UNKNOWN",
+                    "NEEDS_INPUT",
                     "The stored water requirement is invalid. Correct the action data."));
             return;
         }
@@ -239,24 +239,24 @@ public class ConstraintValidationServiceImpl
         if (required == null) {
             constraints.add(new ConstraintResult(
                     "WATER",
-                    "UNKNOWN",
-                    "Water requirement is not available for this action."));
+                    "FIELD_GUIDE",
+                    "The ANGRAU guide gives no separate water quantity for this step. Follow the amount written in the step itself."));
             return;
         }
 
         if (available == null) {
             constraints.add(new ConstraintResult(
                     "WATER",
-                    "UNKNOWN",
-                    "Current farm water availability is not available."));
+                    "NEEDS_INPUT",
+                    "Add how much water you have on the Farm State page so this can be checked."));
             return;
         }
 
         if (!Double.isFinite(available) || available < 0) {
             constraints.add(new ConstraintResult(
                     "WATER",
-                    "UNKNOWN",
-                    "Stored farm water availability is invalid."));
+                    "NEEDS_INPUT",
+                    "Your saved water value is not valid. Correct it on the Farm State page."));
             return;
         }
 
@@ -285,7 +285,7 @@ public class ConstraintValidationServiceImpl
         if (required != null && required < 0) {
             constraints.add(new ConstraintResult(
                     "LABOUR",
-                    "UNKNOWN",
+                    "NEEDS_INPUT",
                     "The stored labour requirement is invalid. Correct the action data."));
             return;
         }
@@ -293,24 +293,24 @@ public class ConstraintValidationServiceImpl
         if (required == null) {
             constraints.add(new ConstraintResult(
                     "LABOUR",
-                    "UNKNOWN",
-                    "Labour requirement is not available for this action."));
+                    "FIELD_GUIDE",
+                    "The ANGRAU guide gives no separate labour count for this step. Plan labour by your field size."));
             return;
         }
 
         if (available == null) {
             constraints.add(new ConstraintResult(
                     "LABOUR",
-                    "UNKNOWN",
-                    "Current farm labour availability is not available."));
+                    "NEEDS_INPUT",
+                    "Add how many workers you have on the Farm State page so this can be checked."));
             return;
         }
 
         if (available < 0) {
             constraints.add(new ConstraintResult(
                     "LABOUR",
-                    "UNKNOWN",
-                    "Stored farm labour availability is invalid."));
+                    "NEEDS_INPUT",
+                    "Your saved labour value is not valid. Correct it on the Farm State page."));
             return;
         }
 
@@ -339,7 +339,7 @@ public class ConstraintValidationServiceImpl
         if (required != null && !isValidRequirement(required)) {
             constraints.add(new ConstraintResult(
                     "BUDGET",
-                    "UNKNOWN",
+                    "NEEDS_INPUT",
                     "The stored budget requirement is invalid. Correct the action data."));
             return;
         }
@@ -347,24 +347,24 @@ public class ConstraintValidationServiceImpl
         if (required == null) {
             constraints.add(new ConstraintResult(
                     "BUDGET",
-                    "UNKNOWN",
-                    "Budget requirement is not available for this action."));
+                    "FIELD_GUIDE",
+                    "The ANGRAU guide gives no separate cost for this step. Price the inputs named in the step at your local shop."));
             return;
         }
 
         if (available == null) {
             constraints.add(new ConstraintResult(
                     "BUDGET",
-                    "UNKNOWN",
-                    "Current farm budget availability is not available."));
+                    "NEEDS_INPUT",
+                    "Add your available budget on the Farm State page so this can be checked."));
             return;
         }
 
         if (!Double.isFinite(available) || available < 0) {
             constraints.add(new ConstraintResult(
                     "BUDGET",
-                    "UNKNOWN",
-                    "Stored farm budget availability is invalid."));
+                    "NEEDS_INPUT",
+                    "Your saved budget value is not valid. Correct it on the Farm State page."));
             return;
         }
 
@@ -396,20 +396,22 @@ public class ConstraintValidationServiceImpl
     private String determineOverallStatus(
             List<ConstraintResult> constraints) {
 
-        boolean hasUnknown = false;
+        boolean needsInput = false;
 
         for (ConstraintResult constraint : constraints) {
             if ("INFEASIBLE".equalsIgnoreCase(constraint.getStatus())) {
-                // A confirmed violation takes precedence over unknown checks.
+                // A confirmed violation takes precedence over missing inputs.
                 return "INFEASIBLE";
             }
 
-            if (!"FEASIBLE".equalsIgnoreCase(constraint.getStatus())) {
-                hasUnknown = true;
+            // FIELD_GUIDE means the source sets no separate figure for
+            // this resource; it does not block the step.
+            if ("NEEDS_INPUT".equalsIgnoreCase(constraint.getStatus())) {
+                needsInput = true;
             }
         }
 
-        return hasUnknown ? "UNKNOWN" : "FEASIBLE";
+        return needsInput ? "NEEDS_INPUT" : "FEASIBLE";
     }
 
     private ConstraintValidationResponse failureResponse(
@@ -421,7 +423,7 @@ public class ConstraintValidationServiceImpl
                 message,
                 farmId,
                 null,
-                "UNKNOWN",
+                "NOT_CHECKED",
                 new ArrayList<>());
     }
 }
