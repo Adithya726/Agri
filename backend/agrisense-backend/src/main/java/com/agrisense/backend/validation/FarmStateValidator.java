@@ -10,7 +10,7 @@ import com.agrisense.backend.model.FarmState;
  * Range checks for farm state values entered by the farmer.
  *
  * Every field stays optional (the context, risk and prediction
- * services already report missing values as UNKNOWN), but a value
+ * services already report missing values as NEEDS_DATA), but a value
  * that is present must be physically sensible. All problems are
  * collected and reported together as one 400 response.
  */

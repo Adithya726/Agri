@@ -131,7 +131,7 @@
 .risk-status-low, .risk-severity-low { color: #166534; background: #dcfce7; }
 .risk-status-medium, .risk-severity-medium { color: #92400e; background: #fef3c7; }
 .risk-status-high, .risk-severity-high { color: #991b1b; background: #fee2e2; }
-.risk-status-unknown, .risk-severity-unknown { color: #475569; background: #e2e8f0; }
+.risk-status-needs_data, .risk-severity-needs_data { color: #475569; background: #e2e8f0; }
 .risk-analysis-message { margin: 15px 0; line-height: 1.6; }
 .risk-list { display: grid; gap: 12px; margin-top: 15px; }
 .risk-item { min-width: 0; padding: 15px; border: 1px solid var(--prediction-border); border-radius: 11px; overflow-wrap: anywhere; }

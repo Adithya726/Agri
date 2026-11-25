@@ -233,13 +233,13 @@ const en = {
         "Current resources available for farm operations.",
 
     waterAvailable:
-        "Water Available",
+        "Water available (m³)",
 
     labourAvailable:
-        "Labour Available",
+        "Workers available",
 
     budgetAvailable:
-        "Budget Available",
+        "Budget available (₹)",
 
     cropHealth:
         "Crop Health",
@@ -269,7 +269,7 @@ const en = {
         "Poor",
 
     unknown:
-        "Unknown",
+        "Not checked yet",
 
     noKnownDisease:
         "No known disease",
@@ -581,7 +581,7 @@ partiallyFeasible:
     "Partially Feasible",
 
 constraintUnknown:
-    "Unknown",
+    "Needs data",
 
 waterConstraint:
     "Water",
@@ -707,7 +707,7 @@ feasible: "Feasible",
 infeasible: "Infeasible",
 constrained: "Constrained",
 partiallyFeasible: "Partially Feasible",
-constraintUnknown: "Unknown",
+constraintUnknown: "Needs data",
 
 waterConstraint: "Water",
 labourConstraint: "Labour",
@@ -1009,7 +1009,7 @@ inactive:
     riskLowMessage: "No elevated context severity was identified by the existing interpretation rules.",
     riskMediumMessage: "One or more context items have MEDIUM severity. Review the listed evidence.",
     riskHighMessage: "One or more context items have HIGH severity. Review the listed evidence carefully.",
-    riskUnknownMessage: "Risk status is UNKNOWN because the available context data is insufficient.",
+    riskUnknownMessage: "Some readings are missing, so the risk can't be judged yet. Add them on the Farm State page.",
     riskNoElevatedRisks: "No elevated risks were identified by the current interpretation rules.",
     riskNotValidatedNote: "This assessment summarizes existing context interpretation rules. It is not a separately validated agricultural risk prediction model.",
     riskCategory: "Category",
@@ -1025,10 +1025,10 @@ inactive:
     riskSeverityLow: "LOW",
     riskSeverityMedium: "MEDIUM",
     riskSeverityHigh: "HIGH",
-    riskSeverityUnknown: "UNKNOWN",
+    riskSeverityUnknown: "Needs data",
     riskCategoryDisease: "DISEASE",
     riskStatusIdentified: "IDENTIFIED",
-    riskStatusUnknown: "UNKNOWN",
+    riskStatusUnknown: "Needs data",
     
 riskDiseaseStatus: "Disease Status",
 riskValueSuspected: "Suspected",
@@ -1354,7 +1354,33 @@ contextRainfallLabel: "Rainfall",
     seasonCheckOk: "OK",
     seasonCheckFail: "Not enough",
     seasonCheckAdd: "Add your value",
-    seasonCheckGuide: "Use guide amount",
+    seasonCheckGuide: "Not sourced",
+    reqWhen: "When",
+    reqDaysAfter: "Days {from} to {to} after {ref}",
+    reqDayAfter: "Day {from} after {ref}",
+    refSOWING: "sowing",
+    refTRANSPLANTING: "transplanting",
+    refEMERGENCE: "seedlings come up",
+    reqForArea: "For your {area} acres",
+    reqPerAcre: "Per acre (add your farm area to see your totals)",
+    reqProducts: "What to buy",
+    reqPickOne: "Pick one",
+    reqOptional: "Only if needed",
+    reqCost: "Cost",
+    reqWorkers: "Workers",
+    reqWater: "Water",
+    reqPersonDays: "person-days",
+    reqNotSourced: "Not sourced",
+    reqNotSourcedAsk: "Not sourced yet. Please tell us your figure for:",
+    reqPriceOn: "price on",
+    reqIncludesLabour: "products and labour",
+    reqProductsOnly: "products only",
+    reqSafety: "Do not use",
+    reqSource: "Source",
+    reqCountedIn: "Counted in:",
+    reqShowDetails: "Show amounts and cost",
+    reqHideDetails: "Hide amounts and cost",
+    reqEstimate: "average price, an estimate",
 };
 
 

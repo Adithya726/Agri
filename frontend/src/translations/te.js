@@ -242,13 +242,13 @@ const te = {
         "వ్యవసాయ కార్యకలాపాలకు అందుబాటులో ఉన్న ప్రస్తుత వనరులు.",
 
     waterAvailable:
-        "అందుబాటులో ఉన్న నీరు",
+        "అందుబాటులో ఉన్న నీరు (m³)",
 
     labourAvailable:
-        "అందుబాటులో ఉన్న కార్మికులు",
+        "అందుబాటులో ఉన్న కూలీలు (సంఖ్య)",
 
     budgetAvailable:
-        "అందుబాటులో ఉన్న బడ్జెట్",
+        "అందుబాటులో ఉన్న బడ్జెట్ (₹)",
 
     cropHealth:
         "పంట ఆరోగ్యం",
@@ -278,7 +278,7 @@ const te = {
         "బలహీనమైన",
 
     unknown:
-        "తెలియదు",
+        "ఇంకా చూడలేదు",
 
     noKnownDisease:
         "తెలిసిన వ్యాధి లేదు",
@@ -588,7 +588,7 @@ partiallyFeasible:
     "పాక్షికంగా సాధ్యమైనది",
 
 constraintUnknown:
-    "తెలియదు",
+    "వివరాలు కావాలి",
 
 waterConstraint:
     "నీరు",
@@ -715,7 +715,7 @@ feasible: "సాధ్యమైనది",
 infeasible: "సాధ్యం కానిది",
 constrained: "పరిమితమైనది",
 partiallyFeasible: "పాక్షికంగా సాధ్యమైనది",
-constraintUnknown: "తెలియదు",
+constraintUnknown: "వివరాలు కావాలి",
 
 waterConstraint: "నీరు",
 labourConstraint: "కార్మికులు",
@@ -1014,7 +1014,7 @@ inactive:
     riskLowMessage: "ప్రస్తుత నియమాల ప్రకారం అధిక స్థాయి ప్రమాదాలు గుర్తించబడలేదు.",
     riskMediumMessage: "ఒకటి లేదా అంతకంటే ఎక్కువ అంశాలకు MEDIUM తీవ్రత ఉంది. వివరించిన ఆధారాలను పరిశీలించండి.",
     riskHighMessage: "ఒకటి లేదా అంతకంటే ఎక్కువ అంశాలకు HIGH తీవ్రత ఉంది. వివరించిన ఆధారాలను జాగ్రత్తగా పరిశీలించండి.",
-    riskUnknownMessage: "అందుబాటులో ఉన్న సమాచారం సరిపోకపోవడంతో ప్రమాద స్థితి UNKNOWNగా ఉంది.",
+    riskUnknownMessage: "కొన్ని రీడింగ్‌లు లేవు, కాబట్టి ప్రమాదాన్ని ఇంకా చెప్పలేము. ఫార్మ్ స్థితి పేజీలో జోడించండి.",
     riskNoElevatedRisks: "ప్రస్తుత విశ్లేషణ నియమాల ప్రకారం అధిక స్థాయి ప్రమాదాలు గుర్తించబడలేదు.",
     riskNotValidatedNote: "ఈ విశ్లేషణ ఇప్పటికే ఉన్న సందర్భ విశ్లేషణ నియమాల ఆధారంగా రూపొందించబడింది. ఇది ప్రత్యేకంగా ధృవీకరించబడిన వ్యవసాయ ప్రమాద అంచనా మోడల్ కాదు.",
     riskCategory: "వర్గం",
@@ -1029,10 +1029,10 @@ inactive:
     riskSeverityLow: "తక్కువ",
     riskSeverityMedium: "మధ్యస్థం",
     riskSeverityHigh: "అధికం",
-    riskSeverityUnknown: "తెలియదు",
+    riskSeverityUnknown: "వివరాలు కావాలి",
     riskCategoryDisease: "వ్యాధి",
     riskStatusIdentified: "గుర్తించబడింది",
-    riskStatusUnknown: "తెలియదు",
+    riskStatusUnknown: "వివరాలు కావాలి",
 
 riskDiseaseStatus: "వ్యాధి స్థితి",
 riskValueSuspected: "అనుమానాస్పదం",
@@ -1295,7 +1295,33 @@ riskEvidenceConfirmed: "వ్యాధి ఉన్నట్లు నిర్
     seasonCheckOk: "సరే",
     seasonCheckFail: "సరిపోదు",
     seasonCheckAdd: "మీ విలువ జోడించండి",
-    seasonCheckGuide: "మార్గదర్శిని మోతాదు వాడండి",
+    seasonCheckGuide: "మూలం లేదు",
+    reqWhen: "ఎప్పుడు",
+    reqDaysAfter: "{ref} తర్వాత {from} నుండి {to} రోజులు",
+    reqDayAfter: "{ref} తర్వాత {from}వ రోజు",
+    refSOWING: "విత్తనం",
+    refTRANSPLANTING: "నాట్లు",
+    refEMERGENCE: "మొలకెత్తిన",
+    reqForArea: "మీ {area} ఎకరాలకు",
+    reqPerAcre: "ఎకరాకు (మొత్తం చూడటానికి పొలం విస్తీర్ణం జోడించండి)",
+    reqProducts: "ఏమి కొనాలి",
+    reqPickOne: "ఒకటి ఎంచుకోండి",
+    reqOptional: "అవసరమైతేనే",
+    reqCost: "ఖర్చు",
+    reqWorkers: "కూలీలు",
+    reqWater: "నీరు",
+    reqPersonDays: "మనిషి-రోజులు",
+    reqNotSourced: "మూలం లేదు",
+    reqNotSourcedAsk: "దీనికి ఇంకా మూలం లేదు. మీ అంకె చెప్పండి:",
+    reqPriceOn: "ధర తేదీ",
+    reqIncludesLabour: "సామగ్రి మరియు కూలి",
+    reqProductsOnly: "సామగ్రి మాత్రమే",
+    reqSafety: "వాడవద్దు",
+    reqSource: "మూలం",
+    reqCountedIn: "ఇందులో లెక్కించబడింది:",
+    reqShowDetails: "మోతాదు, ఖర్చు చూపండి",
+    reqHideDetails: "మోతాదు, ఖర్చు దాచండి",
+    reqEstimate: "సగటు ధర, అంచనా",
 };
 
 export default te;

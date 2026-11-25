@@ -233,13 +233,13 @@ const hi = {
         "कृषि कार्यों के लिए उपलब्ध वर्तमान संसाधन।",
 
     waterAvailable:
-        "उपलब्ध पानी",
+        "उपलब्ध पानी (m³)",
 
     labourAvailable:
-        "उपलब्ध श्रमिक",
+        "उपलब्ध मजदूर (संख्या)",
 
     budgetAvailable:
-        "उपलब्ध बजट",
+        "उपलब्ध बजट (₹)",
 
     cropHealth:
         "फसल का स्वास्थ्य",
@@ -269,7 +269,7 @@ const hi = {
         "खराब",
 
     unknown:
-        "अज्ञात",
+        "अभी जांचा नहीं",
 
     noKnownDisease:
         "कोई ज्ञात रोग नहीं",
@@ -580,7 +580,7 @@ partiallyFeasible:
     "आंशिक रूप से व्यवहार्य",
 
 constraintUnknown:
-    "अज्ञात",
+    "जानकारी चाहिए",
 
 waterConstraint:
     "पानी",
@@ -707,7 +707,7 @@ feasible: "व्यवहार्य",
 infeasible: "अव्यवहार्य",
 constrained: "बाधित",
 partiallyFeasible: "आंशिक रूप से व्यवहार्य",
-constraintUnknown: "अज्ञात",
+constraintUnknown: "जानकारी चाहिए",
 
 waterConstraint: "पानी",
 labourConstraint: "श्रम",
@@ -1005,7 +1005,7 @@ active:
     riskLowMessage: "मौजूदा विश्लेषण नियमों के अनुसार कोई उच्च जोखिम स्तर नहीं पाया गया।",
     riskMediumMessage: "एक या अधिक संदर्भ तत्वों की गंभीरता मध्यम है। दिए गए साक्ष्यों की समीक्षा करें।",
     riskHighMessage: "एक या अधिक संदर्भ तत्वों की गंभीरता उच्च है। दिए गए साक्ष्यों की सावधानीपूर्वक समीक्षा करें।",
-    riskUnknownMessage: "पर्याप्त जानकारी उपलब्ध नहीं होने के कारण जोखिम की स्थिति अज्ञात है।",
+    riskUnknownMessage: "कुछ रीडिंग नहीं हैं, इसलिए जोखिम अभी तय नहीं हो सकता। फार्म स्थिति पेज पर जोड़ें।",
     riskNoElevatedRisks: "वर्तमान विश्लेषण नियमों के अनुसार कोई बढ़ा हुआ जोखिम नहीं पहचाना गया।",
     riskNotValidatedNote: "यह आकलन मौजूदा संदर्भ विश्लेषण नियमों पर आधारित है। यह अलग से सत्यापित कृषि जोखिम पूर्वानुमान मॉडल नहीं है।",
     riskCategory: "श्रेणी",
@@ -1020,10 +1020,10 @@ active:
     riskSeverityLow: "कम",
     riskSeverityMedium: "मध्यम",
     riskSeverityHigh: "उच्च",
-    riskSeverityUnknown: "अज्ञात",
+    riskSeverityUnknown: "जानकारी चाहिए",
     riskCategoryDisease: "रोग",
     riskStatusIdentified: "पहचाना गया",
-    riskStatusUnknown: "अज्ञात",
+    riskStatusUnknown: "जानकारी चाहिए",
 riskDiseaseStatus: "रोग की स्थिति",
 riskValueSuspected: "संदिग्ध",
 riskValueConfirmed: "पुष्टि की गई",
@@ -1285,7 +1285,33 @@ riskEvidenceConfirmed: "रोग होने की पुष्टि हु�
     seasonCheckOk: "ठीक",
     seasonCheckFail: "पर्याप्त नहीं",
     seasonCheckAdd: "अपना मान जोड़ें",
-    seasonCheckGuide: "मार्गदर्शिका की मात्रा लें",
+    seasonCheckGuide: "स्रोत नहीं",
+    reqWhen: "कब",
+    reqDaysAfter: "{ref} के {from} से {to} दिन बाद",
+    reqDayAfter: "{ref} के {from} दिन बाद",
+    refSOWING: "बुवाई",
+    refTRANSPLANTING: "रोपाई",
+    refEMERGENCE: "अंकुर निकलने",
+    reqForArea: "आपके {area} एकड़ के लिए",
+    reqPerAcre: "प्रति एकड़ (कुल देखने के लिए खेत का क्षेत्रफल जोड़ें)",
+    reqProducts: "क्या खरीदें",
+    reqPickOne: "कोई एक चुनें",
+    reqOptional: "ज़रूरत हो तभी",
+    reqCost: "खर्च",
+    reqWorkers: "मजदूर",
+    reqWater: "पानी",
+    reqPersonDays: "मानव-दिवस",
+    reqNotSourced: "स्रोत नहीं",
+    reqNotSourcedAsk: "इसका स्रोत अभी नहीं है। कृपया अपना आंकड़ा बताएं:",
+    reqPriceOn: "कीमत की तारीख",
+    reqIncludesLabour: "सामान और मजदूरी",
+    reqProductsOnly: "केवल सामान",
+    reqSafety: "इस्तेमाल न करें",
+    reqSource: "स्रोत",
+    reqCountedIn: "इसमें गिना गया:",
+    reqShowDetails: "मात्रा और खर्च देखें",
+    reqHideDetails: "मात्रा और खर्च छिपाएं",
+    reqEstimate: "औसत कीमत, अनुमान",
 };
 
 export default hi;

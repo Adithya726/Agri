@@ -4,6 +4,7 @@ import com.agrisense.backend.model.AgriculturalAction;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AgriculturalActionRepository
         extends JpaRepository<AgriculturalAction, Long> {
@@ -18,6 +19,11 @@ public interface AgriculturalActionRepository
             String applicableGrowthStage);
 
     boolean existsByActionNameIgnoreCaseAndApplicableCropIgnoreCaseAndApplicableGrowthStageIgnoreCase(
+            String actionName,
+            String applicableCrop,
+            String applicableGrowthStage);
+
+    Optional<AgriculturalAction> findFirstByActionNameIgnoreCaseAndApplicableCropIgnoreCaseAndApplicableGrowthStageIgnoreCase(
             String actionName,
             String applicableCrop,
             String applicableGrowthStage);

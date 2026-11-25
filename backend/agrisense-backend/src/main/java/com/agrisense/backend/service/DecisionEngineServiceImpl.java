@@ -162,7 +162,7 @@ public class DecisionEngineServiceImpl implements DecisionEngineService {
         List<ContextItem> attention = new ArrayList<>();
         List<ContextItem> items = context.context() == null ? List.of() : context.context();
         for (ContextItem item : items) {
-            String s = item.severity() == null ? "UNKNOWN" : item.severity().toUpperCase(Locale.ROOT);
+            String s = item.severity() == null ? "NEEDS_DATA" : item.severity().toUpperCase(Locale.ROOT);
             switch (s) {
                 case "HIGH" -> { high++; attention.add(item); }
                 case "MEDIUM" -> { medium++; attention.add(item); }

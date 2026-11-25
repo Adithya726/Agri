@@ -1,5 +1,5 @@
 {
-  "note": "Actions taken from ANGRAU Regional Agricultural Research Station, Tirupati packages of practices. Water, labour and budget are left null because the sources do not state them per action. The source's own stage wording is kept in each description; mapping it to the app's six growth stages is noted there.",
+  "note": "Actions taken from ANGRAU Regional Agricultural Research Station, Tirupati packages of practices. Water, labour and budget are left null here; they depend on farm area and are worked out per farm from action-requirements.json and input-prices.json. Banned or phased-out chemicals the guide lists are named only with a do-not-use warning. The source's own stage wording is kept in each description; mapping it to the app's six growth stages is noted there.",
   "sources": {
     "RICE": "ANGRAU RARS Tirupati, Recommendations for Rice Crop Production and Package of Practices, Kharif 2014 & Rabi 2014-15 (Southern Zone), https://www.rarstpt.org/files/rars/package%20of%20practices/Rice.pdf",
     "MAIZE": "ANGRAU RARS Tirupati, Maize (Zea mays L.) Package of Practices (Kharif and Rabi), https://rarstpt.org/files/rars/package%20of%20practices/MaizePackage.pdf"
@@ -16,7 +16,7 @@
      "description": "With a thin film of water, apply one of: Butachlor 1.25 l/acre, Anilophos 500 ml/acre, Pretilachlor 600 ml/acre or Oxadiargyl 40 g/acre within 3-5 days after transplanting. Keep the crop weed free till 45 DAT. (Source section: Weed Management.)"},
     {"source": "RICE", "crop": "rice", "stage": "Seedling", "category": "Pest management",
      "name": "Control gall midge with granules at 15 DAT",
-     "description": "Apply phorate 10G at 12.5 kg/ha or carbofuran 3G at 25 kg/ha at 15 days after transplanting in 1-2 inches of standing water, when gall midge reaches the ETL (one silver shoot per hill or 5% galls per sq m). (Source section: Chemical Control, Tillering Stage.)"},
+     "description": "Apply carbofuran 3G at 25 kg/ha at 15 days after transplanting in 1-2 inches of standing water, when gall midge reaches the ETL (one silver shoot per hill or 5% galls per sq m). The guide also lists phorate 10G, which is now banned (S.O. 3951(E), 08.08.2018); do not use it. (Source section: Chemical Control, Tillering Stage.)"},
     {"source": "RICE", "crop": "rice", "stage": "Vegetative", "category": "Fertilizer",
      "name": "Top-dress nitrogen at active tillering",
      "description": "Apply N in three equal splits (basal, active tillering, panicle initiation); P2O5 and K2O fully as basal. Recommended 80:60:40 kg/ha N:P2O5:K2O in Kharif and 120:60:40 in Rabi. Drain the field before top dressing and irrigate after 2 days. Source stage: active tillering. (Source section: Nutrient Management.)"},
@@ -28,7 +28,7 @@
      "description": "Hand weed at 20 and 40 DAT where enough manual labour is available; for broadleaved weeds spray 2,4-D SS at 400 g/acre at 20-25 DAT. (Source section: Weed Management.)"},
     {"source": "RICE", "crop": "rice", "stage": "Vegetative", "category": "Pest management",
      "name": "Spray against stem borer, thrips and hispa at tillering",
-     "description": "When ETL is reached (stem borer: one egg mass per sq m or 5% dead hearts), spray monocrotophos 36 SL 1.6 ml, chlorpyriphos 20 EC 2.5 ml or phosphamidon 40 SL 2.0 ml per litre of water. Source stage: tillering. (Source section: Chemical Control.)"},
+     "description": "When ETL is reached (stem borer: one egg mass per sq m or 5% dead hearts), spray chlorpyriphos 20 EC 2.5 ml per litre of water. The guide also lists monocrotophos 36 SL (phased out, S.O. 4294(E), 2023) and phosphamidon 40 SL (banned, S.O. 3951(E), 2018); do not use them. Source stage: tillering. (Source section: Chemical Control.)"},
     {"source": "RICE", "crop": "rice", "stage": "Vegetative", "category": "Disease management",
      "name": "Spray for sheath blight at disease initiation",
      "description": "At initiation of sheath blight (normally about 45 DAT in Kharif, 30 DAT in Rabi), spray hexaconazole 5EC 2 ml/l, validamycin 3L 2 ml/l or propiconazole 25 EC 1 ml/l; 2 sprays at 15-day interval. (Source section: Rice Diseases.)"},
@@ -50,13 +50,12 @@
     {"source": "RICE", "crop": "rice", "stage": "Harvest", "category": "Harvest",
      "name": "Harvest at 80% grain maturity and dry to below 13% moisture",
      "description": "Harvest when at least 80% of grains are mature, dry in the field for 2-3 days, thresh and winnow, then sun-dry grain to below 13% moisture. Avoid over- and under-drying. (Source section: Harvesting and Storage.)"},
-
     {"source": "MAIZE", "crop": "maize", "stage": "Seedling", "category": "Crop establishment",
      "name": "Thin to one seedling per hill 10 days after emergence",
      "description": "Thin excess seedlings 10 days after emergence to keep a single seedling per hill, maintaining about 33,333 plants/acre at 60 x 20 cm. (Source sections: Method of sowing, Critical interventions.)"},
     {"source": "MAIZE", "crop": "maize", "stage": "Seedling", "category": "Pest management",
      "name": "Prophylactic spray against stem borer at 10-12 days",
-     "description": "Spray monocrotophos 36 SC 1.6 ml/l or Coragen 0.3 ml/l when the crop is 10-12 days old, and/or apply carbofuran 3G in leaf whorls at 3 kg/acre at 25-30 days. (Source section: Plant protection, Pests.)"},
+     "description": "Spray Coragen 0.3 ml/l when the crop is 10-12 days old, and/or apply carbofuran 3G in leaf whorls at 3 kg/acre at 25-30 days. The guide also lists monocrotophos, which was phased out (S.O. 4294(E), 2023); do not use it. (Source section: Plant protection, Pests.)"},
     {"source": "MAIZE", "crop": "maize", "stage": "Seedling", "category": "Weed management",
      "name": "Apply pre-emergence atrazine",
      "description": "Spray atrazine 50 WP at 800-1200 g/acre depending on soil type as pre-emergence (pure maize crop only). Keep the crop weed free up to 45 days. (Source section: Weeding.)"},

@@ -45,10 +45,10 @@ const GROWTH_STAGE_OPTIONS = [
     "Seedling", "Vegetative", "Flowering", "Fruiting", "Maturity", "Harvest"
 ];
 
-const CROP_HEALTH_OPTIONS = ["Healthy", "Moderate", "Poor", "Unknown"];
+const CROP_HEALTH_OPTIONS = ["Healthy", "Moderate", "Poor", "Not checked"];
 
 const DISEASE_STATUS_OPTIONS = [
-    "No known disease", "Suspected", "Confirmed", "Unknown"
+    "No known disease", "Suspected", "Confirmed", "Not checked"
 ];
 
 /*
@@ -1407,7 +1407,7 @@ function FarmState() {
                                                     {t("poor")}
                                                 </option>
 
-                                                <option value="Unknown">
+                                                <option value="Not checked">
                                                     {t("unknown")}
                                                 </option>
 
@@ -1459,7 +1459,7 @@ function FarmState() {
                                                     {t("confirmed")}
                                                 </option>
 
-                                                <option value="Unknown">
+                                                <option value="Not checked">
                                                     {t("unknown")}
                                                 </option>
 

@@ -12,7 +12,9 @@ import java.util.List;
  *  ADD_DETAILS  - farm details are missing, so some steps cannot be checked.
  *
  * Every step comes from the ANGRAU package of practices stored in the
- * agricultural actions table, with its source. Nothing is estimated.
+ * agricultural actions table, with its source. requirements gives the
+ * amounts, cost, workers and water for this farm's area from sourced
+ * figures; a part with no source is marked not sourced. Nothing is estimated.
  */
 public record SeasonPlanResponse(
         Long farmId,
@@ -46,7 +48,8 @@ public record SeasonPlanResponse(
             String decision,
             List<String> why,
             List<ConstraintResult> checks,
-            String source
+            String source,
+            StepRequirements requirements
     ) {}
 
     // A reading that needs attention, what it means, and what to do.
@@ -79,6 +82,7 @@ public record SeasonPlanResponse(
             String category,
             String instruction,
             boolean completed,
-            String source
+            String source,
+            StepRequirements requirements
     ) {}
 }

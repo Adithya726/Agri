@@ -20,6 +20,7 @@ import com.agrisense.backend.dto.MonitoringResponse.FieldChange;
 import com.agrisense.backend.dto.RiskAnalysisResponse;
 import com.agrisense.backend.dto.RiskAnalysisResponse.RiskFinding;
 import com.agrisense.backend.dto.SeasonPlanResponse;
+import com.agrisense.backend.dto.StepRequirements;
 import com.agrisense.backend.dto.SeasonPlanResponse.Alert;
 import com.agrisense.backend.dto.SeasonPlanResponse.Change;
 import com.agrisense.backend.dto.SeasonPlanResponse.StagePlan;
@@ -78,6 +79,7 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
     private final ConstraintValidationService constraintValidationService;
     private final RiskAnalysisService riskAnalysisService;
     private final ActionPrioritizer actionPrioritizer;
+    private final RequirementCatalog requirementCatalog;
 
     public SeasonPlanServiceImpl(
             FarmRepository farmRepository,
@@ -87,7 +89,8 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
             ActionExecutionRepository executionRepository,
             ConstraintValidationService constraintValidationService,
             RiskAnalysisService riskAnalysisService,
-            ActionPrioritizer actionPrioritizer) {
+            ActionPrioritizer actionPrioritizer,
+            RequirementCatalog requirementCatalog) {
         this.farmRepository = farmRepository;
         this.farmStateRepository = farmStateRepository;
         this.readingRepository = readingRepository;
@@ -96,6 +99,7 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
         this.constraintValidationService = constraintValidationService;
         this.riskAnalysisService = riskAnalysisService;
         this.actionPrioritizer = actionPrioritizer;
+        this.requirementCatalog = requirementCatalog;
     }
 
     @Override
@@ -152,7 +156,8 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
             List<StageStep> steps = cropActions.stream()
                     .filter(a -> s.equalsIgnoreCase(a.getApplicableGrowthStage().trim()))
                     .map(a -> new StageStep(a.getId(), a.getActionName(), a.getCategory(),
-                            a.getDescription(), completed.contains(a.getId()), a.getSourceReference()))
+                            a.getDescription(), completed.contains(a.getId()), a.getSourceReference(),
+                            requirements(a, farm, season)))
                     .toList();
             String status = currentIndex < 0 ? "UPCOMING"
                     : i < currentIndex ? "DONE"
@@ -185,7 +190,7 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
                 AgriculturalAction a = byId.get(r.actionId());
                 Step step = new Step(r.sequence(), a.getId(), a.getActionName(), a.getCategory(),
                         a.getDescription(), plainDecision(r.decision()), r.reasons(),
-                        r.constraints(), a.getSourceReference());
+                        r.constraints(), a.getSourceReference(), requirements(a, farm, season));
                 if (ActionPrioritizer.RECOMMENDED.equals(r.decision())) {
                     doNow.add(step);
                 } else {
@@ -230,6 +235,15 @@ public class SeasonPlanServiceImpl implements SeasonPlanService {
     }
 
     // ------------------------------------------------------------------
+
+    // What the step needs on this farm, or null for an action that has
+    // no sourced requirements (for example one an admin added).
+    private StepRequirements requirements(AgriculturalAction a, Farm farm, String season) {
+        if (requirementCatalog == null) {
+            return null;
+        }
+        return requirementCatalog.requirementsFor(a, farm.getArea(), season).orElse(null);
+    }
 
     private List<Alert> alerts(RiskAnalysisResponse risk, List<Step> doNow, List<Step> onHold) {
         List<Alert> out = new ArrayList<>();
