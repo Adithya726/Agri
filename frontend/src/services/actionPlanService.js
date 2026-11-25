@@ -33,3 +33,12 @@ export const reviewActionPlan = async (planId, decision) => {
 
     return response.data;
 };
+
+// Whole-season plan, re-decided from the farm's latest state.
+export const getSeasonPlan = async (farmId) => {
+    const response = await api.get(
+        `/actionplanapi/season/${farmId}`
+    );
+
+    return response.data;
+};

@@ -68,7 +68,10 @@ function ConstraintValidation() {
             case "INFEASIBLE":
                 return "status-infeasible";
             case "PARTIALLY_FEASIBLE":
+            case "NEEDS_INPUT":
                 return "status-partial";
+            case "FIELD_GUIDE":
+                return "status-feasible";
             default:
                 return "status-unknown";
         }
@@ -548,7 +551,8 @@ function ConstraintValidation() {
                                     <p>
                                         Compare documented action requirements
                                         with the selected farm's saved resources.
-                                        Missing values remain unknown.
+                                        Where the ANGRAU guide gives no separate figure,
+                                        follow the amount written in the step.
                                     </p>
                                 </div>
                             </div>
@@ -680,7 +684,7 @@ function ConstraintValidation() {
                                     >
                                         {getStatusIcon(result.overallStatus)}
                                         <span>
-                                            {result.overallStatus || "UNKNOWN"}
+                                            {(result.overallStatus || "NOT_CHECKED").replace(/_/g, " ")}
                                         </span>
                                     </div>
                                 </div>
@@ -721,8 +725,8 @@ function ConstraintValidation() {
                                                             constraint.status
                                                         )}`}
                                                     >
-                                                        {constraint.status ||
-                                                            "UNKNOWN"}
+                                                        {(constraint.status ||
+                                                            "NOT_CHECKED").replace(/_/g, " ")}
                                                     </span>
                                                 </div>
                                             )

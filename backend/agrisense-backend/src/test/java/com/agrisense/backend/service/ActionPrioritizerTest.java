@@ -106,8 +106,8 @@ class ActionPrioritizerTest {
                         new ConstraintResult("BUDGET", "INFEASIBLE",
                                 "Insufficient budget. Required: 9000.0; available: 5000.0.")));
         ConstraintValidationResponse unknown = new ConstraintValidationResponse(true,
-                "Validation is incomplete because some information is unavailable.", 1L, "Missing", "UNKNOWN",
-                List.of(new ConstraintResult("WATER", "UNKNOWN", "Water requirement is not available for this action.")));
+                "Some of your farm details are missing. Add them on the Farm State page.", 1L, "Missing", "NEEDS_INPUT",
+                List.of(new ConstraintResult("WATER", "NEEDS_INPUT", "Add how much water you have on the Farm State page so this can be checked.")));
 
         List<RankedAction> ranked = prioritizer.prioritize(List.of(
                 new ActionPrioritizer.Candidate(over, overBudget),
@@ -123,7 +123,7 @@ class ActionPrioritizerTest {
         RankedAction needsData = ranked.get(1);
         assertEquals(ActionPrioritizer.NEEDS_DATA, needsData.decision());
         assertEquals("DATA", needsData.dependencies().get(0).type());
-        assertTrue(needsData.reasons().get(0).contains("Water requirement is not available"));
+        assertTrue(needsData.reasons().get(0).contains("Add how much water you have"));
 
         RankedAction rejected = ranked.get(3);
         assertEquals(ActionPrioritizer.REJECTED, rejected.decision());
