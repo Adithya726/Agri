@@ -529,3 +529,23 @@
         gap: 14px;
     }
 }
+
+/* Farm view: the table read against one farm's latest Farm State. */
+.farm-view-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 14px; padding: 12px 14px; border: 1px solid #dfe8e2; border-radius: 10px; background: #f6faf7; }
+.farm-view-bar label { font-size: 13px; color: #33443b; font-weight: 600; }
+.farm-view-bar select { padding: 6px 10px; border-radius: 8px; border: 1px solid #cdd8d1; }
+.farm-view-only { display: inline-flex; align-items: center; gap: 6px; font-weight: 400 !important; }
+.farm-view-summary { font-size: 13px; color: #1f6b45; font-weight: 600; }
+.farm-view-headline { flex-basis: 100%; margin: 0; font-size: 13px; color: #4a5a52; }
+.farm-fit-cell { display: flex; flex-direction: column; gap: 4px; }
+.farm-fit { display: inline-block; width: fit-content; padding: 3px 9px; border-radius: 10px; font-size: 12px; font-weight: 600; background: #eef2ef; color: #5f6d66; }
+.farm-fit-now { background: #e3f3e8; color: #1f6b45; }
+.farm-fit-hold { background: #fff3e0; color: #9a5800; }
+.farm-fit-done { background: #e8eefc; color: #2f4d9a; }
+.farm-fit-later { background: #f2f4f3; color: #4a5a52; }
+.farm-fit-due { font-size: 12px; color: #5f6d66; }
+.farm-row-now { background: #f3fbf5; }
+.farm-needs { display: flex; flex-direction: column; gap: 4px; }
+.farm-needs-toggle { width: fit-content; border: none; background: none; padding: 0; color: #1f6b45; font-size: 12px; text-decoration: underline; cursor: pointer; }
+.farm-needs { min-width: 190px; }
+.farm-fit-cell { min-width: 150px; }

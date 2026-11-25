@@ -53,7 +53,7 @@ const range = (min, max, digits = 1) =>
 
 const rupees = (min, max) => `₹${range(min, max, 0)}`;
 
-const DUE_KEYS = {
+export const DUE_KEYS = {
     DUE_NOW: "dueNow",
     COMING: "dueComing",
     PASSED: "duePassed",
@@ -64,7 +64,7 @@ const DUE_KEYS = {
 
 // When the step falls due on this farm, from the guide's day count and
 // the farm's sowing or transplanting date.
-function DueLine({ due, t }) {
+export function DueLine({ due, t }) {
     if (!due) {
         return null;
     }
@@ -93,7 +93,7 @@ function SourceLink({ url, t }) {
  * the cost in rupees, workers and water. Every figure links to its
  * source; anything without a source says "Not sourced".
  */
-function Requirements({ req, t }) {
+export function Requirements({ req, t }) {
     const timing = req.timing;
     const ref = timing?.countFrom ? t(`ref${timing.countFrom}`) : "";
     let when = timing?.text;
