@@ -3,11 +3,15 @@ import { useEffect, useState } from "react";
 import { getFarmsByFarmerId } from "../services/farmService";
 
 // The signed-in farmer's farms, with the first one selected.
+// farmsError is set when the list could not be loaded (not the same as
+// having no farms); reloadFarms tries again.
 export default function useFarmerFarms(farmerId, onError) {
 
     const [farms, setFarms] = useState([]);
     const [selectedFarmId, setSelectedFarmId] = useState("");
     const [loadingFarms, setLoadingFarms] = useState(true);
+    const [farmsError, setFarmsError] = useState(null);
+    const [reloadKey, setReloadKey] = useState(0);
 
     useEffect(() => {
 
@@ -24,6 +28,7 @@ export default function useFarmerFarms(farmerId, onError) {
 
             try {
                 setLoadingFarms(true);
+                setFarmsError(null);
                 const data = (await getFarmsByFarmerId(farmerId)) || [];
                 if (!cancelled) {
                     setFarms(data);
@@ -33,6 +38,7 @@ export default function useFarmerFarms(farmerId, onError) {
                 if (!cancelled) {
                     setFarms([]);
                     setSelectedFarmId("");
+                    setFarmsError({ message: errorMessage(error, "") });
                     onError?.(error);
                 }
             } finally {
@@ -49,9 +55,11 @@ export default function useFarmerFarms(farmerId, onError) {
         };
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [farmerId]);
+    }, [farmerId, reloadKey]);
 
-    return { farms, selectedFarmId, setSelectedFarmId, loadingFarms };
+    const reloadFarms = () => setReloadKey((key) => key + 1);
+
+    return { farms, selectedFarmId, setSelectedFarmId, loadingFarms, farmsError, reloadFarms };
 }
 
 export const errorMessage = (error, fallback) => {

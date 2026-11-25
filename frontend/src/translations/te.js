@@ -1260,6 +1260,12 @@ riskEvidenceConfirmed: "వ్యాధి ఉన్నట్లు నిర్
     intentWHAT_CHANGED: "ఏమి మారింది",
     intentCURRENT_STATE: "పొలం స్థితి విలువలు",
     intentUNKNOWN: "ఇతర ప్రశ్న",
+    // Phase K: shared page states and mobile navigation
+    retry: "మళ్ళీ ప్రయత్నించండి",
+    loadErrorHint: "మీ కనెక్షన్‌ను తనిఖీ చేసి మళ్ళీ ప్రయత్నించండి.",
+    openMenu: "మెనూ తెరవండి",
+    closeMenu: "మెనూ మూసివేయండి",
+    constraintNoIndividualResults: "ఈ చర్యకు విడివిడి పరిమితి ఫలితాలు రాలేదు.",
 };
 
 export default te;

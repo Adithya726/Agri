@@ -8,7 +8,8 @@ import { useLanguage } from "../../context/LanguageContext";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 
-import { getFarmsByFarmerId } from "../../services/farmService";
+import { FarmListState } from "../../components/PageState/PageState";
+import useFarmerFarms from "../../hooks/useFarmerFarms";
 
 import {
     clearActionExecution,
@@ -85,9 +86,17 @@ function Monitoring() {
     const { farmer } = useAuth();
     const { t } = useLanguage();
 
-    const [farms, setFarms] = useState([]);
-    const [selectedFarmId, setSelectedFarmId] = useState("");
-    const [loadingFarms, setLoadingFarms] = useState(true);
+    const {
+        farms,
+        selectedFarmId,
+        setSelectedFarmId,
+        loadingFarms,
+        farmsError,
+        reloadFarms
+    } = useFarmerFarms(
+        farmer?.userId,
+        (error) => toast.error(getErrorMessage(error, t("farmsLoadFailed")))
+    );
 
     const [monitoring, setMonitoring] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -97,45 +106,6 @@ function Monitoring() {
     const [savingItemId, setSavingItemId] = useState(null);
 
 
-    useEffect(() => {
-
-        const loadFarms = async () => {
-
-            if (!farmer?.userId) {
-                setFarms([]);
-                setSelectedFarmId("");
-                setLoadingFarms(false);
-                return;
-            }
-
-            try {
-
-                setLoadingFarms(true);
-
-                const data = await getFarmsByFarmerId(farmer.userId);
-                const farmerFarms = data || [];
-
-                setFarms(farmerFarms);
-                setSelectedFarmId(
-                    farmerFarms.length > 0 ? String(farmerFarms[0].id) : ""
-                );
-
-            } catch (error) {
-
-                console.error(error);
-                toast.error(getErrorMessage(error, t("farmsLoadFailed")));
-                setFarms([]);
-                setSelectedFarmId("");
-
-            } finally {
-                setLoadingFarms(false);
-            }
-        };
-
-        loadFarms();
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [farmer?.userId]);
 
 
     const loadMonitoring = useCallback(async (farmId) => {
@@ -260,22 +230,15 @@ function Monitoring() {
                 </header>
 
 
-                {loadingFarms && (
-                    <section className="action-plan-card action-plan-empty">
-                        {t("loadingYourFarms")}
-                    </section>
-                )}
+                <FarmListState
+                    loading={loadingFarms}
+                    error={farmsError}
+                    farms={farms}
+                    onRetry={reloadFarms}
+                />
 
 
-                {!loadingFarms && farms.length === 0 && (
-                    <section className="action-plan-card action-plan-empty">
-                        <h3>{t("noFarms")}</h3>
-                        <p>{t("noFarmsDescription")}</p>
-                    </section>
-                )}
-
-
-                {!loadingFarms && farms.length > 0 && (
+                {!loadingFarms && !farmsError && farms.length > 0 && (
 
                     <>
 

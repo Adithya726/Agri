@@ -1250,6 +1250,12 @@ riskEvidenceConfirmed: "रोग होने की पुष्टि हु�
     intentWHAT_CHANGED: "क्या बदला",
     intentCURRENT_STATE: "खेत की स्थिति",
     intentUNKNOWN: "अन्य प्रश्न",
+    // Phase K: shared page states and mobile navigation
+    retry: "फिर से प्रयास करें",
+    loadErrorHint: "अपना कनेक्शन जांचें और फिर से प्रयास करें।",
+    openMenu: "मेनू खोलें",
+    closeMenu: "मेनू बंद करें",
+    constraintNoIndividualResults: "इस कार्य के लिए अलग-अलग बाधा परिणाम नहीं मिले।",
 };
 
 export default hi;

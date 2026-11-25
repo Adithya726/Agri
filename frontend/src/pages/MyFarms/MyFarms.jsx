@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
 import Sidebar from "../../components/Sidebar/Sidebar";
+import PageState from "../../components/PageState/PageState";
 import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 
 import { useAuth } from "../../context/AuthContext";
@@ -35,6 +36,7 @@ function MyFarms() {
     const [form, setForm] = useState(emptyForm);
 
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(null);
     const [saving, setSaving] = useState(false);
 
     const [showForm, setShowForm] = useState(false);
@@ -48,6 +50,7 @@ function MyFarms() {
 
         try {
             setLoading(true);
+            setLoadError(null);
 
             const data = await getFarmsByFarmerId(
                 farmer.userId
@@ -56,6 +59,8 @@ function MyFarms() {
             setFarms(data || []);
         } catch (error) {
             console.error(error);
+
+            setLoadError({ message: error.response?.data?.message || "" });
 
             toast.error(
                 error.response?.data?.message ||
@@ -374,9 +379,14 @@ function MyFarms() {
 
 
                     {loading ? (
-                        <div className="farms-loading">
-                            {t("loading")}
-                        </div>
+                        <PageState variant="loading" message={t("loadingYourFarms")} />
+                    ) : loadError ? (
+                        <PageState
+                            variant="error"
+                            title={t("farmsLoadFailed")}
+                            message={loadError.message || t("loadErrorHint")}
+                            onRetry={loadFarms}
+                        />
                     ) : farms.length === 0 ? (
 
                         <div className="farms-empty">

@@ -219,3 +219,10 @@
         padding: 20px 16px;
     }
 }
+
+/* Long rule names and reference URLs must wrap on narrow screens. */
+.decision-action-body,
+.decision-muted {
+    overflow-wrap: anywhere;
+    min-width: 0;
+}

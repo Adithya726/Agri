@@ -8,6 +8,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 import FarmPicker from "../../components/FarmPicker/FarmPicker";
+import { FarmListState } from "../../components/PageState/PageState";
 
 import useFarmerFarms, { errorMessage } from "../../hooks/useFarmerFarms";
 import { getFarmStateByFarmId } from "../../services/farmStateService";
@@ -126,7 +127,7 @@ function WhatIf() {
     const { farmer } = useAuth();
     const { t } = useLanguage();
 
-    const { farms, selectedFarmId, setSelectedFarmId, loadingFarms } = useFarmerFarms(
+    const { farms, selectedFarmId, setSelectedFarmId, loadingFarms, farmsError, reloadFarms } = useFarmerFarms(
         farmer?.userId,
         (error) => toast.error(errorMessage(error, t("farmsLoadFailed")))
     );
@@ -204,18 +205,14 @@ function WhatIf() {
                     <LanguageSelector />
                 </header>
 
-                {loadingFarms && (
-                    <section className="action-plan-card action-plan-empty">{t("loadingYourFarms")}</section>
-                )}
+                <FarmListState
+                    loading={loadingFarms}
+                    error={farmsError}
+                    farms={farms}
+                    onRetry={reloadFarms}
+                />
 
-                {!loadingFarms && farms.length === 0 && (
-                    <section className="action-plan-card action-plan-empty">
-                        <h3>{t("noFarms")}</h3>
-                        <p>{t("noFarmsDescription")}</p>
-                    </section>
-                )}
-
-                {!loadingFarms && farms.length > 0 && (
+                {!loadingFarms && !farmsError && farms.length > 0 && (
                     <>
                         <FarmPicker
                             id="whatif-farm"

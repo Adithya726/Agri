@@ -8,7 +8,8 @@ import LanguageSelector from "../../components/LanguageSelector/LanguageSelector
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
-import { getFarmsByFarmerId } from "../../services/farmService";
+import { FarmListState } from "../../components/PageState/PageState";
+import useFarmerFarms from "../../hooks/useFarmerFarms";
 import { getFarmDecision } from "../../services/decisionEngineService";
 
 import "./DecisionEngine.css";
@@ -32,37 +33,21 @@ function DecisionEngine() {
     const { farmer } = useAuth();
     const { t } = useLanguage();
 
-    const [farms, setFarms] = useState([]);
-    const [selectedFarmId, setSelectedFarmId] = useState("");
-    const [loadingFarms, setLoadingFarms] = useState(true);
+    const {
+        farms,
+        selectedFarmId,
+        setSelectedFarmId,
+        loadingFarms,
+        farmsError,
+        reloadFarms
+    } = useFarmerFarms(
+        farmer?.userId,
+        (err) => toast.error(getErrorMessage(err, t("farmsLoadFailed")))
+    );
 
     const [decision, setDecision] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
-    useEffect(() => {
-        const loadFarms = async () => {
-            if (!farmer?.userId) {
-                setLoadingFarms(false);
-                return;
-            }
-
-            try {
-                setLoadingFarms(true);
-                const data = (await getFarmsByFarmerId(farmer.userId)) || [];
-                setFarms(data);
-                setSelectedFarmId(data.length > 0 ? String(data[0].id) : "");
-            } catch (err) {
-                console.error(err);
-                toast.error(getErrorMessage(err, t("farmsLoadFailed")));
-            } finally {
-                setLoadingFarms(false);
-            }
-        };
-
-        loadFarms();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [farmer?.userId]);
 
     const loadDecision = useCallback(async (farmId) => {
         if (!farmId) {
@@ -107,6 +92,14 @@ function DecisionEngine() {
                     <LanguageSelector />
                 </div>
 
+                <FarmListState
+                    loading={loadingFarms}
+                    error={farmsError}
+                    farms={farms}
+                    onRetry={reloadFarms}
+                />
+
+                {!loadingFarms && !farmsError && farms.length > 0 && (
                 <section className="decision-card">
                     <div className="decision-farm-selection">
                         <label htmlFor="decision-farm">{t("decisionSelectFarm")}</label>
@@ -115,7 +108,6 @@ function DecisionEngine() {
                             id="decision-farm"
                             value={selectedFarmId}
                             onChange={(event) => setSelectedFarmId(event.target.value)}
-                            disabled={loadingFarms || farms.length === 0}
                         >
                             {farms.map((farm) => (
                                 <option key={farm.id} value={farm.id}>
@@ -135,10 +127,8 @@ function DecisionEngine() {
                         </button>
                     </div>
 
-                    {!loadingFarms && farms.length === 0 && (
-                        <p className="decision-empty">{t("decisionNoFarms")}</p>
-                    )}
                 </section>
+                )}
 
                 {loading && (
                     <p className="decision-loading" data-testid="decision-loading">

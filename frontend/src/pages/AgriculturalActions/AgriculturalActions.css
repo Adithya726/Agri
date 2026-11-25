@@ -522,3 +522,10 @@
     }
 
 }
+/* Stack the page title above its buttons on phones. */
+@media (max-width: 600px) {
+    .agricultural-actions-header {
+        flex-direction: column;
+        gap: 14px;
+    }
+}

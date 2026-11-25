@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
@@ -12,7 +13,34 @@ function Sidebar() {
     const { logout } = useAuth();
     const { t } = useLanguage();
 
+    // Small screens show the sidebar as a drawer opened from the top bar.
+    const [open, setOpen] = useState(false);
+
+    const closeMenu = () => setOpen(false);
+
+    useEffect(() => {
+        if (!open) {
+            return undefined;
+        }
+
+        const onKeyDown = (event) => {
+            if (event.key === "Escape") {
+                setOpen(false);
+            }
+        };
+
+        document.addEventListener("keydown", onKeyDown);
+        document.body.classList.add("sidebar-drawer-open");
+
+        return () => {
+            document.removeEventListener("keydown", onKeyDown);
+            document.body.classList.remove("sidebar-drawer-open");
+        };
+    }, [open]);
+
     const handleLogout = () => {
+        closeMenu();
+
         logout();
 
         toast.success(t("logout"));
@@ -21,7 +49,37 @@ function Sidebar() {
     };
 
     return (
-        <aside className="sidebar">
+        <>
+        {/* Top bar with the menu button, shown on small screens only */}
+        <div className="sidebar-topbar">
+            <button
+                type="button"
+                className="sidebar-toggle"
+                aria-label={open ? t("closeMenu") : t("openMenu")}
+                aria-expanded={open}
+                aria-controls="app-sidebar"
+                onClick={() => setOpen((value) => !value)}
+            >
+                <span aria-hidden="true">{open ? "✕" : "☰"}</span>
+            </button>
+
+            <span className="sidebar-topbar-brand">
+                <span aria-hidden="true">🌱</span> {t("appName")}
+            </span>
+        </div>
+
+        {open && (
+            <div
+                className="sidebar-overlay"
+                aria-hidden="true"
+                onClick={closeMenu}
+            />
+        )}
+
+        <aside
+            id="app-sidebar"
+            className={`sidebar ${open ? "is-open" : ""}`}
+        >
 
             {/* Brand */}
             <div className="sidebar-brand">
@@ -46,6 +104,7 @@ function Sidebar() {
 
                 {/* Dashboard */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/dashboard"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -60,6 +119,7 @@ function Sidebar() {
 
                 {/* Farmer Profile */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/farmer-profile"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -74,6 +134,7 @@ function Sidebar() {
 
                 {/* My Farms */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/farms"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -88,6 +149,7 @@ function Sidebar() {
 
                 {/* Farm State */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/farm-state"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -102,6 +164,7 @@ function Sidebar() {
 
                 {/* Predictions */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/predictions"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -116,6 +179,7 @@ function Sidebar() {
 
                 {/* Context Interpretation */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/context-interpretation"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -130,6 +194,7 @@ function Sidebar() {
 
                 {/* Agricultural Action Knowledge */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/agricultural-actions"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -144,6 +209,7 @@ function Sidebar() {
 
                 {/* Constraint / Feasibility Validation */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/constraint-validation"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -158,6 +224,7 @@ function Sidebar() {
 
                 {/* Decision Engine */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/decision-engine"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -172,6 +239,7 @@ function Sidebar() {
 
                 {/* Action Plan */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/action-plan"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -186,6 +254,7 @@ function Sidebar() {
 
                 {/* Monitoring */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/monitoring"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -200,6 +269,7 @@ function Sidebar() {
 
                 {/* History */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/history"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -214,6 +284,7 @@ function Sidebar() {
 
                 {/* What-If Analysis */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/what-if"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -228,6 +299,7 @@ function Sidebar() {
 
                 {/* Farm Assistant */}
                 <NavLink
+                    onClick={closeMenu}
                     to="/assistant"
                     className={({ isActive }) =>
                         `sidebar-link ${
@@ -245,19 +317,6 @@ function Sidebar() {
             {/* Bottom Actions */}
             <div className="sidebar-bottom">
 
-                {/* Settings */}
-                <NavLink
-                    to="/settings"
-                    className={({ isActive }) =>
-                        `sidebar-link ${
-                            isActive ? "active" : ""
-                        }`
-                    }
-                >
-                    <span className="sidebar-icon">⚙️</span>
-                    <span>{t("settings")}</span>
-                </NavLink>
-
 
                 {/* Logout */}
                 <button
@@ -272,6 +331,7 @@ function Sidebar() {
             </div>
 
         </aside>
+        </>
     );
 }
 

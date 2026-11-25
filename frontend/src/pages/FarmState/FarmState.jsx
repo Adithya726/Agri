@@ -8,7 +8,8 @@ import { useLanguage } from "../../context/LanguageContext";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 
-import { getFarmsByFarmerId } from "../../services/farmService";
+import { FarmListState } from "../../components/PageState/PageState";
+import useFarmerFarms from "../../hooks/useFarmerFarms";
 
 import {
     getFarmStateByFarmId,
@@ -117,12 +118,20 @@ function FarmState() {
     const { farmer } = useAuth();
     const { t } = useLanguage();
 
-    const [farms, setFarms] = useState([]);
-    const [selectedFarmId, setSelectedFarmId] = useState("");
+    const {
+        farms,
+        selectedFarmId,
+        setSelectedFarmId,
+        loadingFarms,
+        farmsError,
+        reloadFarms
+    } = useFarmerFarms(
+        farmer?.userId,
+        (error) => toast.error(error.response?.data?.message || t("farmsLoadFailed"))
+    );
 
     const [farmState, setFarmState] = useState(null);
 
-    const [loadingFarms, setLoadingFarms] = useState(true);
     const [loadingState, setLoadingState] = useState(false);
     const [saving, setSaving] = useState(false);
 
@@ -150,70 +159,6 @@ function FarmState() {
         cropHealth: "",
         diseaseStatus: ""
     });
-
-
-    /*
-     * Load only farms belonging to the logged-in farmer.
-     */
-    useEffect(() => {
-
-        const loadFarms = async () => {
-
-            if (!farmer?.userId) {
-
-                setFarms([]);
-                setSelectedFarmId("");
-                setLoadingFarms(false);
-
-                return;
-            }
-
-            try {
-
-                setLoadingFarms(true);
-
-                const data = await getFarmsByFarmerId(
-                    farmer.userId
-                );
-
-                const farmerFarms = data || [];
-
-                setFarms(farmerFarms);
-
-                if (farmerFarms.length > 0) {
-
-                    setSelectedFarmId(
-                        String(farmerFarms[0].id)
-                    );
-
-                } else {
-
-                    setSelectedFarmId("");
-
-                }
-
-            } catch (error) {
-
-                console.error(error);
-
-                toast.error(
-                    error.response?.data?.message ||
-                    t("farmsLoadFailed")
-                );
-
-                setFarms([]);
-                setSelectedFarmId("");
-
-            } finally {
-
-                setLoadingFarms(false);
-
-            }
-        };
-
-        loadFarms();
-
-    }, [farmer?.userId, t]);
 
 
     /*
@@ -659,43 +604,15 @@ function FarmState() {
 </section>
 
 
-                {/* No farms */}
-
-                {!loadingFarms && farms.length === 0 && (
-
-                    <section className="farm-state-empty">
-
-                        <div className="farm-state-empty-icon">
-                            🌱
-                        </div>
-
-                        <h2>
-                            {t("noFarmAvailable")}
-                        </h2>
-
-                        <p>
-                            {t("addFarmFirst")}
-                        </p>
-
-                    </section>
-
-                )}
+                <FarmListState
+                    loading={loadingFarms}
+                    error={farmsError}
+                    farms={farms}
+                    onRetry={reloadFarms}
+                />
 
 
-                {/* Loading farms */}
-
-                {loadingFarms && (
-
-                    <section className="farm-state-message">
-
-                        {t("loadingYourFarms")}
-
-                    </section>
-
-                )}
-
-
-                {!loadingFarms && farms.length > 0 && (
+                {!loadingFarms && !farmsError && farms.length > 0 && (
 
                     <>
 

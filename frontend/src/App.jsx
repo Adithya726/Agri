@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import ConstraintValidation from "./pages/ConstraintValidation/ConstraintValidation";
 import FarmerProfile from "./pages/FarmerProfile/FarmerProfile";
@@ -65,9 +66,25 @@ function ProtectedRoute({ children }) {
 }
 
 
+// Start every page at the top; the router keeps the old scroll position
+// otherwise, which on phones opens a page half-way down.
+function ScrollToTop() {
+
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
+
+    return null;
+}
+
+
 function App() {
 
     return (
+        <>
+        <ScrollToTop />
         <Routes>
 
             {/* =========================
@@ -255,6 +272,7 @@ function App() {
 
 
         </Routes>
+        </>
     );
 }
 

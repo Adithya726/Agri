@@ -166,45 +166,112 @@
   background: rgba(255, 255, 255, 0.35);
 }
 
-@media (max-width: 900px) {
-  .sidebar {
-    width: 225px;
+/* ------------------------------------------------------------------
+   Page layout contract
+   Every page renders <Sidebar /> right before its <main>. The offset of
+   that main is set here, once, so no page can drift under the sidebar.
+------------------------------------------------------------------- */
+
+.sidebar-topbar,
+.sidebar-overlay {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  .sidebar ~ main {
+    margin-left: 250px !important;
+    width: calc(100% - 250px) !important;
   }
 }
 
-@media (max-width: 700px) {
+/* Small screens: the sidebar becomes a drawer behind a menu button. */
+@media (max-width: 900px) {
   .sidebar {
-    width: 205px;
+    width: min(270px, 82vw);
+    transform: translateX(-100%);
+    visibility: hidden;
+    box-shadow: none;
+    transition:
+      transform 220ms ease,
+      visibility 0s linear 220ms;
   }
 
-  .sidebar-brand {
-    padding-inline: 13px;
+  .sidebar.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    box-shadow: 8px 0 30px rgba(10, 30, 20, 0.28);
+    transition: transform 220ms ease;
   }
 
-  .sidebar-navigation,
-  .sidebar-bottom {
-    padding-inline: 9px;
+  .sidebar ~ main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100%;
   }
 
-  .sidebar-link,
-  .sidebar-logout {
-    gap: 7px;
-    padding-inline: 9px;
-    font-size: 12px;
+  .sidebar-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 14px;
+    color: #fff;
+    background: #103b2b;
+    box-shadow: 0 2px 10px rgba(16, 59, 43, 0.18);
+  }
+
+  .sidebar-toggle {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 11px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .sidebar-toggle:focus-visible {
+    outline: 2px solid #a7dfb0;
+    outline-offset: 2px;
+  }
+
+  .sidebar-topbar-brand {
+    font-family: "Manrope", sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    display: block;
+    background: rgba(8, 24, 16, 0.45);
+  }
+
+  body.sidebar-drawer-open {
+    overflow: hidden;
   }
 }
 
 @media (max-width: 480px) {
-  .sidebar {
-    width: 190px;
-  }
-
   .sidebar-brand-text h1 {
     font-size: 18px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar.is-open,
   .sidebar-link,
   .sidebar-logout {
     transition: none;

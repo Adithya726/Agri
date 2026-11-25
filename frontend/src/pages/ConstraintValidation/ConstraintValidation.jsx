@@ -10,9 +10,11 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../../components/Sidebar/Sidebar";
+import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { getFarmsByFarmerId } from "../../services/farmService";
+import { FarmListState } from "../../components/PageState/PageState";
+import useFarmerFarms from "../../hooks/useFarmerFarms";
 import { getFarmStateByFarmId } from "../../services/farmStateService";
 import { getActionsForFarm } from "../../services/agriculturalActionService";
 import { validateConstraint } from "../../services/constraintValidationService";
@@ -23,8 +25,17 @@ function ConstraintValidation() {
     const { farmer } = useAuth();
     const { t } = useLanguage();
 
-    const [farms, setFarms] = useState([]);
-    const [selectedFarmId, setSelectedFarmId] = useState("");
+    const {
+        farms,
+        selectedFarmId,
+        setSelectedFarmId,
+        loadingFarms,
+        farmsError,
+        reloadFarms
+    } = useFarmerFarms(
+        farmer?.userId,
+        () => toast.error(t("constraintLoadFarmsFailed") || "Unable to load farms.")
+    );
     const [farmState, setFarmState] = useState(null);
 
     const [actions, setActions] = useState([]);
@@ -33,7 +44,6 @@ function ConstraintValidation() {
 
     const [result, setResult] = useState(null);
 
-    const [loadingFarms, setLoadingFarms] = useState(false);
     const [loadingState, setLoadingState] = useState(false);
     const [loadingActions, setLoadingActions] = useState(false);
     const [validating, setValidating] = useState(false);
@@ -75,63 +85,6 @@ function ConstraintValidation() {
 
         return <HelpCircle size={18} />;
     };
-
-    // Load farms belonging to the logged-in farmer.
-    useEffect(() => {
-        let cancelled = false;
-
-        const loadFarms = async () => {
-            if (!farmer?.userId) {
-                setFarms([]);
-                setSelectedFarmId("");
-                return;
-            }
-
-            try {
-                setLoadingFarms(true);
-
-                const data = await getFarmsByFarmerId(
-                    farmer.userId
-                );
-
-                if (cancelled) return;
-
-                const farmerFarms = Array.isArray(data) ? data : [];
-                setFarms(farmerFarms);
-
-                setSelectedFarmId((currentId) => {
-                    const stillExists = farmerFarms.some(
-                        (farm) => String(farm.id) === String(currentId)
-                    );
-
-                    if (stillExists) return currentId;
-
-                    return farmerFarms.length
-                        ? String(farmerFarms[0].id)
-                        : "";
-                });
-            } catch (error) {
-                console.error("Failed to load farms:", error);
-
-                if (!cancelled) {
-                    setFarms([]);
-                    setSelectedFarmId("");
-                    toast.error(
-                        t("constraintLoadFarmsFailed") ||
-                        "Unable to load farms."
-                    );
-                }
-            } finally {
-                if (!cancelled) setLoadingFarms(false);
-            }
-        };
-
-        loadFarms();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [farmer?.userId, t]);
 
     // Load the selected farm's latest saved state.
     useEffect(() => {
@@ -349,8 +302,19 @@ function ConstraintValidation() {
                                         "Check whether an agricultural action is feasible using the available farm resources."}
                                 </p>
                             </div>
+
+                            <LanguageSelector />
                         </header>
 
+                        <FarmListState
+                            loading={loadingFarms}
+                            error={farmsError}
+                            farms={farms}
+                            onRetry={reloadFarms}
+                        />
+
+                        {!loadingFarms && !farmsError && farms.length > 0 && (
+                        <>
                         {/* Farm selection */}
                         <section className="constraint-card">
                             <div className="constraint-section-header">
@@ -374,13 +338,10 @@ function ConstraintValidation() {
                                     id="constraint-farm"
                                     value={selectedFarmId}
                                     onChange={handleFarmChange}
-                                    disabled={loadingFarms}
                                 >
                                     <option value="">
-                                        {loadingFarms
-                                            ? t("loading") || "Loading..."
-                                            : t("constraintChooseFarm") ||
-                                              "Choose a farm"}
+                                        {t("constraintChooseFarm") ||
+                                            "Choose a farm"}
                                     </option>
 
                                     {farms.map((farm) => (
@@ -771,12 +732,13 @@ function ConstraintValidation() {
                                     <div className="constraint-info-box">
                                         <HelpCircle size={20} />
                                         <span>
-                                            No individual constraint results
-                                            were returned by the backend.
+                                            {t("constraintNoIndividualResults")}
                                         </span>
                                     </div>
                                 )}
                             </section>
+                        )}
+                        </>
                         )}
                     </div>
                 </div>

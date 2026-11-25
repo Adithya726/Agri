@@ -1319,6 +1319,12 @@ contextRainfallLabel: "Rainfall",
     intentWHAT_CHANGED: "What changed",
     intentCURRENT_STATE: "Farm state values",
     intentUNKNOWN: "Other question",
+    // Phase K: shared page states and mobile navigation
+    retry: "Try again",
+    loadErrorHint: "Check your connection and try again.",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    constraintNoIndividualResults: "No individual constraint results were returned for this action.",
 };
 
 

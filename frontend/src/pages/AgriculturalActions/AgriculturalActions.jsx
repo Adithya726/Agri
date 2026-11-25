@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../../components/Sidebar/Sidebar";
+import PageState from "../../components/PageState/PageState";
+import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import {
@@ -42,6 +44,7 @@ function AgriculturalActions() {
 
     const [actions, setActions] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadFailed, setLoadFailed] = useState(false);
     const [saving, setSaving] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({ ...INITIAL_FORM });
@@ -53,10 +56,12 @@ function AgriculturalActions() {
     const loadActions = async () => {
         try {
             setLoading(true);
+            setLoadFailed(false);
             const data = await getAllAgriculturalActions();
             setActions(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Failed to load agricultural actions:", error);
+            setLoadFailed(true);
             toast.error(t("agriculturalActionsLoadFailed"));
         } finally {
             setLoading(false);
@@ -199,6 +204,8 @@ function AgriculturalActions() {
                             </div>
 
                             <div className="header-actions">
+                                <LanguageSelector />
+
                                 <button
                                     type="button"
                                     className="secondary-action-button"
@@ -545,6 +552,13 @@ function AgriculturalActions() {
                                     <RefreshCw className="spin" size={25} />
                                     <p>{t("loading")}</p>
                                 </div>
+                            ) : loadFailed ? (
+                                <PageState
+                                    variant="error"
+                                    title={t("agriculturalActionsLoadFailed")}
+                                    message={t("loadErrorHint")}
+                                    onRetry={loadActions}
+                                />
                             ) : actions.length === 0 ? (
                                 <div className="empty-state">
                                     <BookOpen size={35} />

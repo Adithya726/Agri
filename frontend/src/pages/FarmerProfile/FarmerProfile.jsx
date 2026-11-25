@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
 import Sidebar from "../../components/Sidebar/Sidebar";
+import PageState from "../../components/PageState/PageState";
 import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 
 import { useAuth } from "../../context/AuthContext";
@@ -28,6 +29,8 @@ function FarmerProfile() {
 
     const [editing, setEditing] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(null);
+    const [reloadKey, setReloadKey] = useState(0);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
@@ -38,6 +41,9 @@ function FarmerProfile() {
             }
 
             try {
+                setLoading(true);
+                setLoadError(null);
+
                 const data = await getFarmerById(farmer.userId);
 
                 setProfile({
@@ -50,6 +56,8 @@ function FarmerProfile() {
             } catch (error) {
                 console.error(error);
 
+                setLoadError({ message: error.response?.data?.message || "" });
+
                 toast.error(
                     error.response?.data?.message ||
                     t("profileLoadFailed")
@@ -60,7 +68,7 @@ function FarmerProfile() {
         };
 
         loadProfile();
-    }, [farmer?.userId, t]);
+    }, [farmer?.userId, t, reloadKey]);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -154,9 +162,7 @@ function FarmerProfile() {
                 <Sidebar />
 
                 <main className="profile-main">
-                    <div className="profile-loading">
-                        {t("loading")}
-                    </div>
+                    <PageState variant="loading" message={t("loading")} />
                 </main>
             </div>
         );
@@ -196,6 +202,14 @@ function FarmerProfile() {
     </div>
 </section>
 
+                {loadError ? (
+                    <PageState
+                        variant="error"
+                        title={t("profileLoadFailed")}
+                        message={loadError.message || t("loadErrorHint")}
+                        onRetry={() => setReloadKey((key) => key + 1)}
+                    />
+                ) : (
                 <section className="profile-card">
 
                     <div className="profile-card-header">
@@ -320,6 +334,7 @@ function FarmerProfile() {
                     </div>
 
                 </section>
+                )}
 
             </main>
         </div>

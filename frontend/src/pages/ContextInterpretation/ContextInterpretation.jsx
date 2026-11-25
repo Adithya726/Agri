@@ -19,7 +19,8 @@ import LanguageSelector from "../../components/LanguageSelector/LanguageSelector
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 
-import { getFarmsByFarmerId } from "../../services/farmService";
+import { FarmListState } from "../../components/PageState/PageState";
+import useFarmerFarms from "../../hooks/useFarmerFarms";
 import {
     getContextInterpretation
 } from "../../services/contextInterpretationService";
@@ -100,66 +101,21 @@ const ContextInterpretation = () => {
     const { farmer } = useAuth();
     const { t } = useLanguage();
 
-    const [farms, setFarms] = useState([]);
-    const [selectedFarmId, setSelectedFarmId] = useState("");
+    const {
+        farms,
+        selectedFarmId,
+        setSelectedFarmId,
+        loadingFarms,
+        farmsError,
+        reloadFarms
+    } = useFarmerFarms(
+        farmer?.userId,
+        () => toast.error(t("contextFarmLoadFailed"))
+    );
 
     const [contextResult, setContextResult] = useState(null);
 
-    const [loadingFarms, setLoadingFarms] = useState(true);
     const [loadingContext, setLoadingContext] = useState(false);
-
-
-    // ==========================================
-    // LOAD FARMER FARMS
-    // ==========================================
-
-    useEffect(() => {
-
-        const loadFarms = async () => {
-
-            if (!farmer?.userId) {
-                setFarms([]);
-                setLoadingFarms(false);
-                return;
-            }
-
-            try {
-
-                setLoadingFarms(true);
-
-                const data =
-                    await getFarmsByFarmerId(
-                        farmer.userId
-                    );
-
-                setFarms(data || []);
-
-                if (data?.length > 0) {
-                    setSelectedFarmId(
-                        String(data[0].id)
-                    );
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to load farms:",
-                    error
-                );
-
-                toast.error(
-                    t("contextFarmLoadFailed")
-                );
-
-            } finally {
-
-                setLoadingFarms(false);
-            }
-        };
-
-        loadFarms();
-
-    }, [farmer, t]);
 
 
     // ==========================================
@@ -300,6 +256,15 @@ const ContextInterpretation = () => {
                 </div>
 
 
+                <FarmListState
+                    loading={loadingFarms}
+                    error={farmsError}
+                    farms={farms}
+                    onRetry={reloadFarms}
+                />
+
+                {!loadingFarms && !farmsError && farms.length > 0 && (
+                <>
                 {/* =====================================
                     FARM SELECTION
                 ====================================== */}
@@ -430,6 +395,8 @@ const ContextInterpretation = () => {
                     )}
 
                 </section>
+                </>
+                )}
 
 
                 {/* =====================================
@@ -642,28 +609,6 @@ const ContextInterpretation = () => {
                         </div>
                     )}
 
-
-                {/* =====================================
-                    NO FARM
-                ====================================== */}
-
-                {!loadingFarms &&
-                    farms.length === 0 && (
-
-                        <div className="context-empty">
-
-                            <Leaf size={42} />
-
-                            <h3>
-                                {t("contextNoFarms")}
-                            </h3>
-
-                            <p>
-                                {t("contextNoFarmsDescription")}
-                            </p>
-
-                        </div>
-                    )}
 
             </main>
 

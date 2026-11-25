@@ -101,8 +101,11 @@ function Dashboard() {
                     0
                 );
 
+                // A 404 means that farm has no state saved yet, not a failure.
                 const allRequestsSucceeded = stateResults.every(
-                    (result) => result.status === "fulfilled"
+                    (result) =>
+                        result.status === "fulfilled" ||
+                        result.reason?.response?.status === 404
                 );
 
                 setFarmStateCount(
