@@ -36,6 +36,10 @@ public class FarmStateResponse {
 
     private String diseaseStatus;
 
+    private java.time.LocalDate sowingDate;
+
+    private java.time.LocalDate transplantingDate;
+
     public FarmStateResponse() {
     }
 
@@ -211,5 +215,21 @@ public class FarmStateResponse {
 
     public void setDiseaseStatus(String diseaseStatus) {
         this.diseaseStatus = diseaseStatus;
+    }
+
+    public java.time.LocalDate getSowingDate() {
+        return sowingDate;
+    }
+
+    public void setSowingDate(java.time.LocalDate sowingDate) {
+        this.sowingDate = sowingDate;
+    }
+
+    public java.time.LocalDate getTransplantingDate() {
+        return transplantingDate;
+    }
+
+    public void setTransplantingDate(java.time.LocalDate transplantingDate) {
+        this.transplantingDate = transplantingDate;
     }
 }

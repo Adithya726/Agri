@@ -202,6 +202,8 @@ public class WhatIfServiceImpl implements WhatIfService {
                 s.getPotassium(), s.getTemperature(), s.getHumidity(), s.getRainfall(),
                 s.getWaterAvailable(), s.getLabourAvailable(), s.getBudgetAvailable(),
                 s.getCropHealth(), s.getDiseaseStatus());
+        c.setSowingDate(s.getSowingDate());
+        c.setTransplantingDate(s.getTransplantingDate());
         return c;
     }
 

@@ -10,6 +10,9 @@ public interface ActionPlanService {
 
     ActionPlanResponse getPlanById(Long planId);
 
+    // Latest plan, or a fresh draft when the farm state changed since.
+    ActionPlanResponse currentPlan(Long farmId);
+
     List<ActionPlanResponse> getPlansByFarmId(Long farmId);
 
     ActionPlanResponse reviewPlan(Long planId, String decision);

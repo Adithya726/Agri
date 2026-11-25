@@ -44,6 +44,13 @@ public class FarmState {
 
     private String diseaseStatus;
 
+    // Day the crop was sown (rice nursery or maize field) and, for
+    // transplanted rice, the day it was transplanted. Step timings in
+    // the guide count from one of these.
+    private java.time.LocalDate sowingDate;
+
+    private java.time.LocalDate transplantingDate;
+
     public FarmState() {
     }
 
@@ -217,5 +224,21 @@ public class FarmState {
 
     public void setDiseaseStatus(String diseaseStatus) {
         this.diseaseStatus = diseaseStatus;
+    }
+
+    public java.time.LocalDate getSowingDate() {
+        return sowingDate;
+    }
+
+    public void setSowingDate(java.time.LocalDate sowingDate) {
+        this.sowingDate = sowingDate;
+    }
+
+    public java.time.LocalDate getTransplantingDate() {
+        return transplantingDate;
+    }
+
+    public void setTransplantingDate(java.time.LocalDate transplantingDate) {
+        this.transplantingDate = transplantingDate;
     }
 }

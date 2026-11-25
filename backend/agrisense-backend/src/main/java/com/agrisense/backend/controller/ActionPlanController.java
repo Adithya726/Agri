@@ -36,6 +36,19 @@ public class ActionPlanController {
         return ResponseEntity.ok(seasonPlanService.buildSeasonPlan(farmId));
     }
 
+    // The plan for the farm as it is now: a new draft is made when the
+    // farm state was saved after the latest plan.
+    @GetMapping("/current/{farmId}")
+    public ResponseEntity<?> currentPlan(@PathVariable Long farmId) {
+        ownershipGuard.requireFarm(farmId);
+
+        try {
+            return ResponseEntity.ok(actionPlanService.currentPlan(farmId));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     // Generate a draft action plan for a farm
     @PostMapping("/generate/{farmId}")
     public ResponseEntity<?> generateDraft(@PathVariable Long farmId) {
