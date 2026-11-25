@@ -29,8 +29,11 @@ import com.agrisense.backend.repository.AgriculturalActionRepository;
 import com.agrisense.backend.repository.FarmRepository;
 import com.agrisense.backend.repository.FarmStateReadingRepository;
 import com.agrisense.backend.repository.FarmStateRepository;
+import tools.jackson.databind.ObjectMapper;
 
 class SeasonPlanServiceImplTest {
+
+    private static final RequirementCatalog CATALOG = new RequirementCatalog(new ObjectMapper());
 
     private final FarmRepository farms = mock(FarmRepository.class);
     private final FarmStateRepository states = mock(FarmStateRepository.class);
@@ -40,10 +43,10 @@ class SeasonPlanServiceImplTest {
     private final RiskAnalysisService risk = mock(RiskAnalysisService.class);
 
     private final ConstraintValidationServiceImpl validation =
-            new ConstraintValidationServiceImpl(farms, states, actions);
+            new ConstraintValidationServiceImpl(farms, states, actions, CATALOG);
 
     private final SeasonPlanServiceImpl service = new SeasonPlanServiceImpl(farms, states, readings,
-            actions, executions, validation, risk, new ActionPrioritizer());
+            actions, executions, validation, risk, new ActionPrioritizer(), CATALOG);
 
     private Farm farm;
     private FarmState state;

@@ -52,26 +52,26 @@ public class RiskAnalysisServiceImpl implements RiskAnalysisService {
                     farmId,
                     contextResponse.crop(),
                     contextResponse.growthStage(),
-                    "UNKNOWN",
+                    "NEEDS_DATA",
                     risks
             );
         }
 
         boolean hasHigh = false;
         boolean hasMedium = false;
-        boolean hasUnknown = false;
+        boolean needsData = false;
 
         for (ContextItem item : contextResponse.context()) {
 
             String severity = normalize(item.severity());
 
-            if ("UNKNOWN".equals(severity)) {
-                hasUnknown = true;
+            if ("NEEDS_DATA".equals(severity)) {
+                needsData = true;
                 risks.add(new RiskFinding(
                         item.category(),
                         item.parameter(),
                         item.value(),
-                        "UNKNOWN",
+                        "NEEDS_DATA",
                         item.interpretation(),
                         "INSUFFICIENT_DATA"
                 ));
@@ -84,12 +84,12 @@ public class RiskAnalysisServiceImpl implements RiskAnalysisService {
                 hasMedium = true;
             } else if (!"LOW".equals(severity)
                     && !"INFO".equals(severity)) {
-                hasUnknown = true;
+                needsData = true;
                 risks.add(new RiskFinding(
                         item.category(),
                         item.parameter(),
                         item.value(),
-                        "UNKNOWN",
+                        "NEEDS_DATA",
                         item.interpretation(),
                         "UNRECOGNIZED_SEVERITY"
                 ));
@@ -116,8 +116,8 @@ public class RiskAnalysisServiceImpl implements RiskAnalysisService {
             overallStatus = "HIGH";
         } else if (hasMedium) {
             overallStatus = "MEDIUM";
-        } else if (hasUnknown) {
-            overallStatus = "UNKNOWN";
+        } else if (needsData) {
+            overallStatus = "NEEDS_DATA";
         } else {
             overallStatus = "LOW";
         }
@@ -127,7 +127,7 @@ public class RiskAnalysisServiceImpl implements RiskAnalysisService {
                     "One or more context items have HIGH severity. Review the listed evidence.";
             case "MEDIUM" ->
                     "One or more context items have MEDIUM severity. Review the listed evidence.";
-            case "UNKNOWN" ->
+            case "NEEDS_DATA" ->
                     "Some context information is unavailable or insufficient.";
             default ->
                     "No elevated context severity was identified by the existing interpretation rules.";
@@ -146,7 +146,7 @@ public class RiskAnalysisServiceImpl implements RiskAnalysisService {
 
     private String normalize(String severity) {
         return severity == null
-                ? "UNKNOWN"
+                ? "NEEDS_DATA"
                 : severity.trim().toUpperCase(Locale.ROOT);
     }
 }

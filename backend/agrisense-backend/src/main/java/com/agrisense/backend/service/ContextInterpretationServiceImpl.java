@@ -335,7 +335,7 @@ public class ContextInterpretationServiceImpl
 
                     "Soil pH data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -555,7 +555,7 @@ public class ContextInterpretationServiceImpl
 
                             " data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -657,7 +657,7 @@ public class ContextInterpretationServiceImpl
 
                     "Temperature data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -747,7 +747,7 @@ public class ContextInterpretationServiceImpl
 
                     "Humidity data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -837,7 +837,7 @@ public class ContextInterpretationServiceImpl
 
                     "Rainfall data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -933,7 +933,7 @@ public class ContextInterpretationServiceImpl
 
                     "Soil moisture data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -1023,7 +1023,7 @@ public class ContextInterpretationServiceImpl
 
                     "Water availability data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -1111,7 +1111,7 @@ public class ContextInterpretationServiceImpl
 
                     "Labour availability data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -1193,7 +1193,7 @@ public class ContextInterpretationServiceImpl
 
                     "Budget availability data unavailable",
 
-                    "UNKNOWN"
+                    "NEEDS_DATA"
 
             );
 
@@ -1277,7 +1277,7 @@ public class ContextInterpretationServiceImpl
         String status =
                 diseaseStatus.trim().toLowerCase();
 
-        if (status.contains("unknown")) {
+        if ((status.contains("unknown") || status.contains("not checked"))) {
             return "Disease status unavailable";
         }
 
@@ -1306,14 +1306,14 @@ public class ContextInterpretationServiceImpl
         if (diseaseStatus == null ||
                 diseaseStatus.isBlank()) {
 
-            return "UNKNOWN";
+            return "NEEDS_DATA";
         }
 
         String status =
                 diseaseStatus.trim().toLowerCase();
 
-        if (status.contains("unknown")) {
-            return "UNKNOWN";
+        if ((status.contains("unknown") || status.contains("not checked"))) {
+            return "NEEDS_DATA";
         }
 
         if (status.contains("healthy") ||

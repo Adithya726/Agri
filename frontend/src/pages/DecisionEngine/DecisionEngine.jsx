@@ -24,7 +24,7 @@ const getErrorMessage = (error, fallback) => {
     return data?.message || fallback;
 };
 
-const lower = (value) => String(value || "unknown").toLowerCase();
+const lower = (value) => String(value || "needs_data").toLowerCase();
 
 const formatNumber = (value) =>
     value === null || value === undefined ? "—" : Number(value).toLocaleString();

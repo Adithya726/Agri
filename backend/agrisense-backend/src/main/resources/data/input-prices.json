@@ -1,0 +1,390 @@
+{
+  "note": "Sourced input prices, wages, labour and water figures used to cost each ANGRAU step. Prices vary by shop and date; every figure carries its source.",
+  "conversions": {
+    "acresPerHectare": 2.471,
+    "m3PerCmPerAcre": 40.47
+  },
+  "products": {
+    "UREA": {
+      "name": "Urea",
+      "packSize": 45,
+      "packUnit": "kg",
+      "price": 266.5,
+      "priceDate": "2026-05-04",
+      "nutrients": {
+        "N": 0.46
+      },
+      "source": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2257893",
+      "nutrientSource": "https://agritech.tnau.ac.in/agriculture//agri_nutrientmgt_nutrientcontent.html",
+      "note": "PIB PRID 2257893; base price Rs 242 (PRID 2243036)."
+    },
+    "DAP": {
+      "name": "DAP",
+      "packSize": 50,
+      "packUnit": "kg",
+      "price": 1350,
+      "priceDate": "2026-03-10",
+      "nutrients": {
+        "N": 0.18,
+        "P2O5": 0.46
+      },
+      "source": "https://sansad.in/getFile/loksabhaquestions/annex/187/AU2804_5Q9ywE.pdf?source=pqals",
+      "nutrientSource": "https://agritech.tnau.ac.in/agriculture//agri_nutrientmgt_nutrientcontent.html",
+      "note": "Lok Sabha unstarred question 2804, 10 Mar 2026."
+    },
+    "MOP": {
+      "name": "MOP (potash)",
+      "packSize": 50,
+      "packUnit": "kg",
+      "price": 1710.54,
+      "priceDate": "2026-03-10",
+      "estimate": true,
+      "nutrients": {
+        "K2O": 0.6
+      },
+      "source": "https://sansad.in/getFile/loksabhaquestions/annex/187/AU2804_5Q9ywE.pdf?source=pqals",
+      "nutrientSource": "https://agritech.tnau.ac.in/agriculture//agri_nutrientmgt_nutrientcontent.html",
+      "note": "2025-26 all-India average price, an estimate."
+    },
+    "SSP": {
+      "name": "SSP",
+      "packSize": 50,
+      "packUnit": "kg",
+      "price": 506.57,
+      "priceDate": "2026-03-10",
+      "estimate": true,
+      "nutrients": {
+        "P2O5": 0.16
+      },
+      "source": "https://sansad.in/getFile/loksabhaquestions/annex/187/AU2804_5Q9ywE.pdf?source=pqals",
+      "nutrientSource": "https://agritech.tnau.ac.in/agriculture//agri_nutrientmgt_nutrientcontent.html",
+      "note": "2025-26 all-India average price, an estimate."
+    },
+    "BUTACHLOR": {
+      "name": "Butachlor (Machete)",
+      "packSize": 1,
+      "packUnit": "l",
+      "price": 690,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "PRETILACHLOR": {
+      "name": "Pretilachlor (Rifit)",
+      "packSize": 1,
+      "packUnit": "l",
+      "price": 849,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "ANILOFOS": {
+      "name": "Anilofos (Aniloguard)",
+      "packSize": 1,
+      "packUnit": "l",
+      "price": 514,
+      "priceDate": "2026-11-25",
+      "shop": "Spraykaro",
+      "source": "https://spraykaro.com"
+    },
+    "OXADIARGYL": {
+      "name": "Oxadiargyl (Tabah)",
+      "packSize": 35,
+      "packUnit": "g",
+      "price": 350,
+      "priceDate": "2026-11-25",
+      "shop": "farmersplace.in",
+      "source": "https://farmersplace.in"
+    },
+    "TWO_FOUR_D": {
+      "name": "2,4-D sodium salt (Weedmar 80)",
+      "packSize": 500,
+      "packUnit": "g",
+      "price": 264,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "CARBOFURAN_3G": {
+      "name": "Carbofuran 3G (Furadan)",
+      "packSize": 1,
+      "packUnit": "kg",
+      "price": 163,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "CHLORPYRIPHOS": {
+      "name": "Chlorpyriphos 20 EC (Dursban)",
+      "packSize": 1,
+      "packUnit": "l",
+      "price": 535,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "CORAGEN": {
+      "name": "Coragen",
+      "packSize": 150,
+      "packUnit": "ml",
+      "price": 1071,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "ACEPHATE": {
+      "name": "Acephate (Acemain)",
+      "packSize": 500,
+      "packUnit": "g",
+      "price": 389,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "IMIDACLOPRID": {
+      "name": "Imidacloprid 17.8 SL (Tatamida)",
+      "packSize": 500,
+      "packUnit": "ml",
+      "price": 1011,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "BUPROFEZIN": {
+      "name": "Buprofezin (Applaud)",
+      "packSize": 500,
+      "packUnit": "ml",
+      "price": 468,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "HEXACONAZOLE": {
+      "name": "Hexaconazole 5 EC (Contaf)",
+      "packSize": 1,
+      "packUnit": "l",
+      "price": 749,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "VALIDAMYCIN": {
+      "name": "Validamycin 3 L (Sheathmar)",
+      "packSize": 1,
+      "packUnit": "l",
+      "price": 529,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "PROPICONAZOLE": {
+      "name": "Propiconazole 25 EC (Tilt)",
+      "packSize": 500,
+      "packUnit": "ml",
+      "price": 676,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "TRICYCLAZOLE": {
+      "name": "Tricyclazole 75 WP (Beam)",
+      "packSize": 100,
+      "packUnit": "g",
+      "price": 264,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "ISOPROTHIOLANE": {
+      "name": "Isoprothiolane 40 EC (Fujione)",
+      "packSize": 500,
+      "packUnit": "ml",
+      "price": 498,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "COPPER_OXYCHLORIDE": {
+      "name": "Copper oxychloride 50 WP (Blitox)",
+      "packSize": 500,
+      "packUnit": "g",
+      "price": 674,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "CARBENDAZIM": {
+      "name": "Carbendazim 50 WP (Bavistin)",
+      "packSize": 500,
+      "packUnit": "g",
+      "price": 599,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "MANCOZEB": {
+      "name": "Mancozeb (M45)",
+      "packSize": 1,
+      "packUnit": "kg",
+      "price": 754,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    },
+    "ATRAZINE": {
+      "name": "Atrazine 50 WP (Dhanuzine)",
+      "packSize": 500,
+      "packUnit": "g",
+      "price": 279,
+      "priceDate": "2026-11-25",
+      "shop": "BigHaat",
+      "source": "https://www.bighaat.com"
+    }
+  },
+  "wages": {
+    "_source": "https://labourbureau.gov.in/home/excel_download_ruralWage_data?state_id=1",
+    "_note": "Andhra Pradesh average daily rural wage, Labour Bureau, January 2026. Rupees per person per day.",
+    "SOWING_TRANSPLANTING_WEEDING": {
+      "men": 613.31,
+      "women": 443.87,
+      "source": "https://labourbureau.gov.in/home/excel_download_ruralWage_data?state_id=1",
+      "asOf": "2026-01"
+    },
+    "HARVESTING_THRESHING": {
+      "men": 623.74,
+      "women": 423.16,
+      "source": "https://labourbureau.gov.in/home/excel_download_ruralWage_data?state_id=1",
+      "asOf": "2026-01"
+    },
+    "GENERAL_IRRIGATION": {
+      "men": 599.44,
+      "women": 433.71,
+      "source": "https://labourbureau.gov.in/home/excel_download_ruralWage_data?state_id=1",
+      "asOf": "2026-01"
+    },
+    "PLANT_PROTECTION": {
+      "men": 896.83,
+      "source": "https://labourbureau.gov.in/home/excel_download_ruralWage_data?state_id=1",
+      "asOf": "2026-01"
+    },
+    "PLOUGHING": {
+      "men": 691.65,
+      "source": "https://labourbureau.gov.in/home/excel_download_ruralWage_data?state_id=1",
+      "asOf": "2026-01"
+    }
+  },
+  "labour": {
+    "RICE_TRANSPLANTING": {
+      "personDays": 30,
+      "per": "ha",
+      "wage": "SOWING_TRANSPLANTING_WEEDING",
+      "source": "https://www.agronomyjournals.com/archives/2025/vol8issue12S/PartD/S-8-11-60-743.pdf"
+    },
+    "RICE_HAND_WEEDING": {
+      "personDays": 27,
+      "per": "acre",
+      "wage": "SOWING_TRANSPLANTING_WEEDING",
+      "source": "https://www.manage.gov.in/nf/pop/cost%20of%20cultivation-paddy.pdf",
+      "note": "15 person-days in the first round and 12 in the second."
+    },
+    "RICE_SPRAY": {
+      "personDays": 6,
+      "per": "ha",
+      "wage": "PLANT_PROTECTION",
+      "source": "https://www.agronomyjournals.com/archives/2025/vol8issue12S/PartD/S-8-11-60-743.pdf",
+      "note": "Knapsack sprayer, one spray."
+    },
+    "RICE_HARVEST": {
+      "personDays": 65,
+      "per": "ha",
+      "wage": "HARVESTING_THRESHING",
+      "source": "https://www.agronomyjournals.com/archives/2025/vol8issue12S/PartD/S-8-11-60-743.pdf",
+      "note": "Harvest and threshing."
+    },
+    "RICE_FERTILIZER_SEASON": {
+      "personDays": 2,
+      "per": "ha",
+      "wage": "GENERAL_IRRIGATION",
+      "source": "https://www.mathsjournal.com/pdf/2023/vol8issue6S/PartK/S-8-6-133-124.pdf",
+      "seasonTotalOnly": true,
+      "note": "Whole season; no per-application figure."
+    },
+    "RICE_IRRIGATION_SEASON": {
+      "personDays": 8,
+      "per": "ha",
+      "wage": "GENERAL_IRRIGATION",
+      "source": "https://www.mathsjournal.com/pdf/2023/vol8issue6S/PartK/S-8-6-133-124.pdf",
+      "seasonTotalOnly": true,
+      "note": "Whole season; no per-irrigation figure."
+    },
+    "MAIZE_THINNING": {
+      "personDays": 5,
+      "per": "ha",
+      "wage": "SOWING_TRANSPLANTING_WEEDING",
+      "source": "https://www.manage.gov.in/publications/farmerbook.pdf"
+    },
+    "MAIZE_WEEDING_EARTHING": {
+      "personDays": 15,
+      "per": "ha",
+      "wage": "SOWING_TRANSPLANTING_WEEDING",
+      "source": "https://krishikosh.egranth.ac.in/server/api/core/bitstreams/6dfce3b8-0233-4b85-8faa-a2b152a3c673/content"
+    },
+    "MAIZE_SPRAY": {
+      "personDays": 5,
+      "per": "ha",
+      "wage": "PLANT_PROTECTION",
+      "source": "https://tbf.peerjournals.net/wp-content/uploads/2023/02/TBF-5.pdf",
+      "note": "One spray."
+    },
+    "MAIZE_HARVEST": {
+      "personDays": 62.5,
+      "per": "ha",
+      "wage": "HARVESTING_THRESHING",
+      "source": "https://tbf.peerjournals.net/wp-content/uploads/2023/02/TBF-5.pdf",
+      "note": "Harvest including shelling."
+    }
+  },
+  "water": {
+    "RICE_SEASON_MM": {
+      "value": 1100,
+      "source": "http://www.agritech.tnau.ac.in/expert_system/paddy/cultivationpractices3.html",
+      "byStage": {
+        "nursery": 40,
+        "puddling": 200,
+        "plantingToPanicleInitiation": 458,
+        "panicleInitiationToFlowering": 417,
+        "floweringToMaturity": 125
+      },
+      "note": "Last irrigation 15 days before harvest."
+    },
+    "MAIZE_SEASON_MM": {
+      "min": 500,
+      "max": 600,
+      "perIrrigationMm": 50,
+      "source": "https://agritech.tnau.ac.in/agriculture/agri_irrigationmgt_maize.html",
+      "note": "5 cm per irrigation; critical window 45 to 65 days after sowing."
+    },
+    "SPRAY_LITRES_PER_ACRE": {
+      "value": 200,
+      "source": "https://www.rarstpt.org/files/rars/package%20of%20practices/Rice.pdf",
+      "note": "200 litres per acre, as written in the ANGRAU rice package (also ICAR-NRRI)."
+    }
+  },
+  "banned": [
+    {
+      "chemical": "phorate",
+      "rule": "Banned by S.O. 3951(E), 08.08.2018",
+      "reference": "Gazette of India S.O. 3951(E), 08.08.2018"
+    },
+    {
+      "chemical": "phosphamidon",
+      "rule": "Banned by S.O. 3951(E), 08.08.2018",
+      "reference": "Gazette of India S.O. 3951(E), 08.08.2018"
+    },
+    {
+      "chemical": "monocrotophos",
+      "rule": "36% SL phased out by S.O. 4294(E), 2023",
+      "reference": "Gazette of India S.O. 4294(E), 2023"
+    }
+  ]
+}

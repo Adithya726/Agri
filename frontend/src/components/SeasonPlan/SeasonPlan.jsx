@@ -42,8 +42,150 @@ const getErrorMessage = (error, fallback) => {
 
 const cls = (value) => String(value || "").toLowerCase().replace(/_/g, "-");
 
+const fill = (text, values) =>
+    Object.entries(values).reduce((out, [k, v]) => out.replace(`{${k}}`, v), text);
+
+const num = (value, digits = 1) =>
+    Number(value).toLocaleString("en-IN", { maximumFractionDigits: digits });
+
+const range = (min, max, digits = 1) =>
+    min === max || max == null ? num(min, digits) : `${num(min, digits)} – ${num(max, digits)}`;
+
+const rupees = (min, max) => `₹${range(min, max, 0)}`;
+
+const isLink = (value) => typeof value === "string" && value.startsWith("http");
+
+function SourceLink({ url, t }) {
+    if (!isLink(url)) {
+        return null;
+    }
+    return (
+        <a className="season-req-src" href={url} target="_blank" rel="noreferrer">
+            {t("reqSource")}
+        </a>
+    );
+}
+
+/*
+ * What one step needs on this farm: when, what to buy and how much,
+ * the cost in rupees, workers and water. Every figure links to its
+ * source; anything without a source says "Not sourced".
+ */
+function Requirements({ req, t }) {
+    const timing = req.timing;
+    const ref = timing?.countFrom ? t(`ref${timing.countFrom}`) : "";
+    let when = timing?.text;
+    if (timing?.fromDay != null) {
+        const days = timing.toDay != null && timing.toDay !== timing.fromDay
+            ? fill(t("reqDaysAfter"), { from: timing.fromDay, to: timing.toDay, ref })
+            : fill(t("reqDayAfter"), { from: timing.fromDay, ref });
+        when = `${days}. ${timing.text}`;
+    }
+
+    const labour = req.labour;
+    const water = req.water;
+    const cost = req.cost;
+
+    return (
+        <div className="season-req">
+            <p className="season-req-area">
+                {req.areaAcres ? fill(t("reqForArea"), { area: num(req.areaAcres, 2) }) : t("reqPerAcre")}
+            </p>
+
+            {req.safetyNotes?.map((note, i) => (
+                <p key={i} className="season-req-safety">
+                    <strong>{t("reqSafety")}:</strong> {note}
+                </p>
+            ))}
+
+            <dl className="season-req-grid">
+                <dt>{t("reqWhen")}</dt>
+                <dd>
+                    {when} <SourceLink url={timing?.source} t={t} />
+                </dd>
+
+                <dt>{t("reqCost")}</dt>
+                <dd>
+                    {cost.max > 0 ? (
+                        <>
+                            <strong>{rupees(cost.min, cost.max)}</strong>{" "}
+                            ({cost.includesLabour ? t("reqIncludesLabour") : t("reqProductsOnly")})
+                        </>
+                    ) : (
+                        <span className="season-req-missing">{t("reqNotSourced")}</span>
+                    )}
+                </dd>
+
+                <dt>{t("reqWorkers")}</dt>
+                <dd>
+                    {labour.sourced ? (
+                        labour.parts.map((part, i) => (
+                            <span key={i} className="season-req-line">
+                                {part.operation}: {range(part.personDaysMin, part.personDaysMax)} {t("reqPersonDays")},{" "}
+                                {rupees(part.costMin, part.costMax)} ({part.wageType}){" "}
+                                <SourceLink url={part.source} t={t} />
+                            </span>
+                        ))
+                    ) : (
+                        <span className="season-req-missing">{t("reqNotSourced")}</span>
+                    )}
+                </dd>
+
+                <dt>{t("reqWater")}</dt>
+                <dd>
+                    {!water.sourced ? (
+                        <span className="season-req-missing">{t("reqNotSourced")}</span>
+                    ) : water.includedIn ? (
+                        <>{t("reqCountedIn")} {water.includedIn}</>
+                    ) : (
+                        <>
+                            {range(water.m3Min, water.m3Max)} m³
+                            {water.label ? ` (${water.label})` : ""} <SourceLink url={water.source} t={t} />
+                        </>
+                    )}
+                </dd>
+            </dl>
+
+            {req.inputs?.length > 0 && (
+                <>
+                    <h5>
+                        {t("reqProducts")}
+                        {req.inputs.some((i) => i.choice) ? ` (${t("reqPickOne")})` : ""}
+                    </h5>
+                    <ul className="season-req-inputs">
+                        {req.inputs.map((input) => (
+                            <li key={input.product}>
+                                <strong>{input.name}</strong>: {range(input.quantityMin, input.quantityMax, 2)} {input.unit},{" "}
+                                {rupees(input.costMin, input.costMax)}
+                                {input.optional ? ` · ${t("reqOptional")}` : ""}
+                                {input.purpose ? ` · ${input.purpose}` : ""}
+                                <small>
+                                    {" "}₹{num(input.packPrice, 2)} / {num(input.packSize, 2)} {input.packUnit}
+                                    {input.shop ? `, ${input.shop}` : ""}, {t("reqPriceOn")} {input.priceDate}
+                                    {input.priceEstimate ? ` (${t("reqEstimate")})` : ""}{" "}
+                                    <SourceLink url={input.priceSource} t={t} />
+                                </small>
+                            </li>
+                        ))}
+                    </ul>
+                    <p className="season-req-note">{req.priceNote}</p>
+                </>
+            )}
+
+            {req.notes?.map((note, i) => <p key={i} className="season-req-note">{note}</p>)}
+
+            {req.notSourced?.length > 0 && (
+                <p className="season-req-ask">
+                    {t("reqNotSourcedAsk")} {req.notSourced.join("; ")}.
+                </p>
+            )}
+        </div>
+    );
+}
+
 function StepCard({ step, t }) {
     const [open, setOpen] = useState(false);
+    const [showReq, setShowReq] = useState(false);
 
     return (
         <li className="season-step">
@@ -67,6 +209,13 @@ function StepCard({ step, t }) {
                         {step.why.map((reason, i) => <li key={i}>{reason}</li>)}
                     </ul>
                 )}
+
+                {step.requirements && (
+                    <button type="button" className="season-link" onClick={() => setShowReq(!showReq)}>
+                        {showReq ? t("reqHideDetails") : t("reqShowDetails")}
+                    </button>
+                )}
+                {showReq && step.requirements && <Requirements req={step.requirements} t={t} />}
 
                 {step.checks?.length > 0 && (
                     <button type="button" className="season-link" onClick={() => setOpen(!open)}>
@@ -236,6 +385,11 @@ function SeasonPlan({ farmId }) {
                                                     <li key={s.actionId} className={s.completed ? "season-done" : ""}
                                                         title={s.instruction}>
                                                         {s.completed ? "✓ " : ""}{s.name}
+                                                        {s.requirements?.cost?.max > 0 && (
+                                                            <small className="season-stage-cost">
+                                                                {" "}· {rupees(s.requirements.cost.min, s.requirements.cost.max)}
+                                                            </small>
+                                                        )}
                                                     </li>
                                                 ))}
                                             </ul>

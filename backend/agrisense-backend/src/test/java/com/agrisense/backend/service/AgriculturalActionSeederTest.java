@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -18,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -62,18 +62,36 @@ class AgriculturalActionSeederTest {
         }
     }
 
+    private static AgriculturalAction existing(String name, String crop, String stage, String description) {
+        AgriculturalAction a = new AgriculturalAction();
+        a.setId(7L);
+        a.setActionName(name);
+        a.setApplicableCrop(crop);
+        a.setApplicableGrowthStage(stage);
+        a.setDescription(description);
+        a.setEvidenceStatus(AgriculturalActionSeeder.EVIDENCE_STATUS);
+        a.setActive(Boolean.FALSE);
+        return a;
+    }
+
+    private void stubFind(String name, String crop, String stage, AgriculturalAction row) {
+        when(repository.findFirstByActionNameIgnoreCaseAndApplicableCropIgnoreCaseAndApplicableGrowthStageIgnoreCase(
+                eq(name), eq(crop), eq(stage))).thenReturn(Optional.of(row));
+    }
+
     @Test
     void seedInsertsOnlyMissingActions() throws IOException {
-        when(repository.existsByActionNameIgnoreCaseAndApplicableCropIgnoreCaseAndApplicableGrowthStageIgnoreCase(
-                anyString(), anyString(), anyString())).thenReturn(false);
-        when(repository.existsByActionNameIgnoreCaseAndApplicableCropIgnoreCaseAndApplicableGrowthStageIgnoreCase(
-                eq("Hand weed at 20 and 40 days after transplanting"), eq("rice"), eq("Vegetative")))
-                .thenReturn(true);
+        List<AgriculturalAction> fileActions = seeder.read(dataFile());
+        AgriculturalAction weed = fileActions.stream()
+                .filter(a -> a.getActionName().startsWith("Hand weed")).findFirst().orElseThrow();
+        AgriculturalAction row = existing(weed.getActionName(), "rice", "Vegetative", weed.getDescription());
+        row.setCategory(weed.getCategory());
+        row.setSourceReference(weed.getSourceReference());
+        stubFind(weed.getActionName(), "rice", "Vegetative", row);
 
-        int total = seeder.read(dataFile()).size();
         int added = seeder.seed(dataFile());
 
-        assertEquals(total - 1, added);
+        assertEquals(fileActions.size() - 1, added);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<AgriculturalAction>> saved = ArgumentCaptor.forClass(List.class);
@@ -83,12 +101,58 @@ class AgriculturalActionSeederTest {
     }
 
     @Test
-    void seedSavesNothingWhenAllActionsExist() throws IOException {
-        when(repository.existsByActionNameIgnoreCaseAndApplicableCropIgnoreCaseAndApplicableGrowthStageIgnoreCase(
-                anyString(), anyString(), anyString())).thenReturn(true);
+    void seedUpdatesChangedSourcedRowsButKeepsActiveFlagAndId() throws IOException {
+        String name = "Control gall midge with granules at 15 DAT";
+        AgriculturalAction row = existing(name, "rice", "Seedling",
+                "Apply phorate 10G at 12.5 kg/ha or carbofuran 3G at 25 kg/ha.");
+        stubFind(name, "rice", "Seedling", row);
+
+        AgriculturalActionSeeder.Result result = seeder.seedOrUpdate(dataFile());
+
+        assertEquals(1, result.updated());
+        assertTrue(row.getDescription().startsWith("Apply carbofuran 3G"));
+        assertEquals(7L, row.getId());
+        assertFalse(row.getActive());
+    }
+
+    @Test
+    void seedLeavesAdminAddedRowsAlone() throws IOException {
+        String name = "Control gall midge with granules at 15 DAT";
+        AgriculturalAction row = existing(name, "rice", "Seedling", "Admin wording");
+        row.setEvidenceStatus("EXPERT_REVIEWED");
+        stubFind(name, "rice", "Seedling", row);
+
+        AgriculturalActionSeeder.Result result = seeder.seedOrUpdate(dataFile());
+
+        assertEquals(0, result.updated());
+        assertEquals("Admin wording", row.getDescription());
+    }
+
+    @Test
+    void seedSavesNothingWhenAllActionsAreCurrent() throws IOException {
+        for (AgriculturalAction a : seeder.read(dataFile())) {
+            AgriculturalAction row = existing(a.getActionName(), a.getApplicableCrop(),
+                    a.getApplicableGrowthStage(), a.getDescription());
+            row.setCategory(a.getCategory());
+            row.setSourceReference(a.getSourceReference());
+            stubFind(a.getActionName(), a.getApplicableCrop(), a.getApplicableGrowthStage(), row);
+        }
 
         assertEquals(0, seeder.seed(dataFile()));
         verify(repository, never()).saveAll(any());
+    }
+
+    @Test
+    void noStepRecommendsABannedChemical() throws IOException {
+        for (AgriculturalAction a : seeder.read(dataFile())) {
+            String d = a.getDescription().toLowerCase(java.util.Locale.ROOT);
+            for (String banned : List.of("phorate", "phosphamidon", "monocrotophos")) {
+                int at = d.indexOf(banned);
+                if (at >= 0) {
+                    assertTrue(d.substring(at).contains("do not use"), a.getActionName());
+                }
+            }
+        }
     }
 
     @Test

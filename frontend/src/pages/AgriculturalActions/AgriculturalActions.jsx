@@ -177,7 +177,7 @@ function AgriculturalActions() {
 
     const renderOptionalValue = (value, unit) => {
         if (value === null || value === undefined || value === "") {
-            return "Unknown";
+            return "As written in the step";
         }
 
         return `${value} ${unit}`;
@@ -373,8 +373,8 @@ function AgriculturalActions() {
                                             supported by a verified source or
                                             a documented project assumption.
                                             Leave unavailable values empty.
-                                            Empty values remain Unknown; they
-                                            are not treated as zero.
+                                            Empty values show "As written in the
+                                            step"; they are not treated as zero.
                                         </p>
 
                                         <div className="form-grid">
@@ -391,7 +391,7 @@ function AgriculturalActions() {
                                                     onChange={handleChange}
                                                     min="0"
                                                     step="any"
-                                                    placeholder="Unknown if unavailable"
+                                                    placeholder="Leave blank if the source gives none"
                                                 />
 
                                                 <small>
@@ -415,7 +415,7 @@ function AgriculturalActions() {
                                                     onChange={handleChange}
                                                     min="0"
                                                     step="1"
-                                                    placeholder="Unknown if unavailable"
+                                                    placeholder="Leave blank if the source gives none"
                                                 />
 
                                                 <small>
@@ -437,7 +437,7 @@ function AgriculturalActions() {
                                                     onChange={handleChange}
                                                     min="0"
                                                     step="any"
-                                                    placeholder="Unknown if unavailable"
+                                                    placeholder="Leave blank if the source gives none"
                                                 />
 
                                                 <small>

@@ -75,3 +75,25 @@
     .season-plan-top { flex-direction: column; }
     .season-step-head { flex-direction: column; }
 }
+
+/* Step requirements: amounts, cost, workers and water for this farm. */
+.season-req { margin: 10px 0; padding: 12px; border: 1px solid #dfe7dc; border-radius: 10px; background: #fafcf8; }
+.season-req h5 { margin: 12px 0 6px; font-size: 0.92rem; }
+.season-req-area { margin: 0 0 8px; font-weight: 600; color: #2f5d34; }
+.season-req-grid { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; }
+.season-req-grid dt { font-weight: 600; color: #4b5b4d; }
+.season-req-grid dd { margin: 0; overflow-wrap: anywhere; }
+.season-req-line { display: block; }
+.season-req-inputs { margin: 0; padding-left: 18px; }
+.season-req-inputs li { margin-bottom: 6px; overflow-wrap: anywhere; }
+.season-req-inputs small { display: block; color: #66756a; }
+.season-req-missing { display: inline-block; padding: 1px 8px; border-radius: 999px; background: #fff4dc; color: #8a6210; font-size: 0.85rem; }
+.season-req-safety { margin: 0 0 8px; padding: 8px 10px; border-radius: 8px; background: #fdecea; color: #8a1f17; }
+.season-req-note { margin: 6px 0 0; font-size: 0.85rem; color: #66756a; }
+.season-req-ask { margin: 8px 0 0; font-size: 0.88rem; color: #8a6210; }
+.season-req-src { margin-left: 4px; font-size: 0.8rem; }
+.season-stage-cost { color: #66756a; }
+@media (max-width: 600px) {
+    .season-req-grid { grid-template-columns: 1fr; }
+    .season-req-grid dt { margin-top: 6px; }
+}

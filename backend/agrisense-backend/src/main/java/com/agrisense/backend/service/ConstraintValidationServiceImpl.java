@@ -1,8 +1,11 @@
 
 package com.agrisense.backend.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.agrisense.backend.dto.ConstraintResult;
 import com.agrisense.backend.dto.ConstraintValidationRequest;
 import com.agrisense.backend.dto.ConstraintValidationResponse;
+import com.agrisense.backend.dto.StepRequirements;
 import com.agrisense.backend.model.AgriculturalAction;
 import com.agrisense.backend.model.Farm;
 import com.agrisense.backend.model.FarmState;
@@ -24,15 +28,18 @@ public class ConstraintValidationServiceImpl
     private final FarmRepository farmRepository;
     private final FarmStateRepository farmStateRepository;
     private final AgriculturalActionRepository agriculturalActionRepository;
+    private final RequirementCatalog requirementCatalog;
 
     public ConstraintValidationServiceImpl(
             FarmRepository farmRepository,
             FarmStateRepository farmStateRepository,
-            AgriculturalActionRepository agriculturalActionRepository) {
+            AgriculturalActionRepository agriculturalActionRepository,
+            RequirementCatalog requirementCatalog) {
 
         this.farmRepository = farmRepository;
         this.farmStateRepository = farmStateRepository;
         this.agriculturalActionRepository = agriculturalActionRepository;
+        this.requirementCatalog = requirementCatalog;
     }
 
     @Override
@@ -116,10 +123,16 @@ public class ConstraintValidationServiceImpl
         validateCropApplicability(action, farmState, constraints);
         validateGrowthStageApplicability(action, farmState, constraints);
 
-        // 7. Validate resource requirements.
-        validateWater(action, farmState, constraints);
-        validateLabour(action, farmState, constraints);
-        validateBudget(action, farmState, constraints);
+        // 7. Validate resource requirements. Sourced ANGRAU steps are
+        // checked against what the step needs on this farm's area;
+        // other actions use the figures stored on the action.
+        if (requirementCatalog != null && requirementCatalog.hasRequirements(action)) {
+            validateComputed(action, farmState, farmId, constraints);
+        } else {
+            validateWater(action, farmState, constraints);
+            validateLabour(action, farmState, constraints);
+            validateBudget(action, farmState, constraints);
+        }
 
         // 8. Determine the overall result.
         String overallStatus = determineOverallStatus(constraints);
@@ -380,6 +393,147 @@ public class ConstraintValidationServiceImpl
                     "Insufficient budget. Required: " + required
                             + "; available: " + available + "."));
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Checks against the computed requirements (water in m3, labour in
+    // workers, budget in rupees).
+
+    private void validateComputed(
+            AgriculturalAction action,
+            FarmState farmState,
+            Long farmId,
+            List<ConstraintResult> constraints) {
+
+        Double area = farmArea(farmState, farmId);
+        if (area == null || !Double.isFinite(area) || area <= 0) {
+            String msg = "Add your farm's area in acres on the Farms page so the amounts for your field can be worked out.";
+            constraints.add(new ConstraintResult("WATER", "NEEDS_INPUT", msg));
+            constraints.add(new ConstraintResult("LABOUR", "NEEDS_INPUT", msg));
+            constraints.add(new ConstraintResult("BUDGET", "NEEDS_INPUT", msg));
+            return;
+        }
+
+        String season = SeasonPlanServiceImpl.seasonFor(LocalDate.now(ZoneId.of("Asia/Kolkata")));
+        StepRequirements req = requirementCatalog.requirementsFor(action, area, season).orElseThrow();
+
+        checkWater(req.water(), farmState.getWaterAvailable(), constraints);
+        checkLabour(req.labour(), farmState.getLabourAvailable(), constraints);
+        checkBudget(req.cost(), farmState.getBudgetAvailable(), constraints);
+    }
+
+    private Double farmArea(FarmState farmState, Long farmId) {
+        if (farmState.getFarm() != null && farmState.getFarm().getArea() != null) {
+            return farmState.getFarm().getArea();
+        }
+        if (farmId == null) {
+            return null;
+        }
+        return farmRepository.findById(farmId).map(Farm::getArea).orElse(null);
+    }
+
+    private void checkWater(StepRequirements.Water water, Double available, List<ConstraintResult> constraints) {
+        if (!water.sourced()) {
+            constraints.add(new ConstraintResult("WATER", "FIELD_GUIDE",
+                    "Water for this step is not sourced: " + water.notSourced()
+                            + ". Note how much you use so it can be planned next time."));
+            return;
+        }
+        double need = water.m3Min();
+        if (need <= 0) {
+            constraints.add(new ConstraintResult("WATER", "FEASIBLE",
+                    water.includedIn() != null
+                            ? "This step's water is counted in the step \"" + water.includedIn() + "\"."
+                            : "This step needs no extra water."));
+            return;
+        }
+        if (available == null) {
+            constraints.add(new ConstraintResult("WATER", "NEEDS_INPUT",
+                    "This step needs about " + num(need) + " m3 of water. Add the water you have (m3) on the Farm State page."));
+            return;
+        }
+        if (!Double.isFinite(available) || available < 0) {
+            constraints.add(new ConstraintResult("WATER", "NEEDS_INPUT",
+                    "Your saved water value is not valid. Correct it on the Farm State page."));
+            return;
+        }
+        if (available >= need) {
+            constraints.add(new ConstraintResult("WATER", "FEASIBLE",
+                    "Needs about " + num(need) + " m3 of water; you have " + num(available) + " m3."));
+        } else {
+            constraints.add(new ConstraintResult("WATER", "INFEASIBLE",
+                    "Not enough water. Needs about " + num(need) + " m3; you have " + num(available) + " m3."));
+        }
+    }
+
+    private void checkLabour(StepRequirements.Labour labour, Integer workers, List<ConstraintResult> constraints) {
+        if (!labour.sourced()) {
+            constraints.add(new ConstraintResult("LABOUR", "FIELD_GUIDE",
+                    "Workers for " + labour.notSourced() + " are not sourced. Note how many person-days it takes you."));
+            return;
+        }
+        double personDays = labour.personDaysMax();
+        if (workers == null) {
+            constraints.add(new ConstraintResult("LABOUR", "NEEDS_INPUT",
+                    "This step needs about " + num(personDays) + " person-days. Add how many workers you have on the Farm State page."));
+            return;
+        }
+        if (workers < 0) {
+            constraints.add(new ConstraintResult("LABOUR", "NEEDS_INPUT",
+                    "Your saved labour value is not valid. Correct it on the Farm State page."));
+            return;
+        }
+        if (workers == 0) {
+            constraints.add(new ConstraintResult("LABOUR", "INFEASIBLE",
+                    "This step needs about " + num(personDays) + " person-days, but no workers are available."));
+            return;
+        }
+        double days = Math.ceil(personDays / workers * 10.0) / 10.0;
+        constraints.add(new ConstraintResult("LABOUR", "FEASIBLE",
+                "About " + num(personDays) + " person-days: " + num(days) + (days == 1.0 ? " day" : " days")
+                        + " with your " + workers + (workers == 1 ? " worker." : " workers.")));
+    }
+
+    private void checkBudget(StepRequirements.Cost cost, Double available, List<ConstraintResult> constraints) {
+        String part = cost.includesLabour() ? "" : " for products only (labour cost is not sourced)";
+        if (cost.max() <= 0) {
+            constraints.add(new ConstraintResult("BUDGET", "FIELD_GUIDE",
+                    "No sourced cost for this step. Note what you spend so it can be planned next time."));
+            return;
+        }
+        if (available == null) {
+            constraints.add(new ConstraintResult("BUDGET", "NEEDS_INPUT",
+                    "This step costs about " + rupees(cost.min(), cost.max()) + part
+                            + ". Add your budget (rupees) on the Farm State page."));
+            return;
+        }
+        if (!Double.isFinite(available) || available < 0) {
+            constraints.add(new ConstraintResult("BUDGET", "NEEDS_INPUT",
+                    "Your saved budget value is not valid. Correct it on the Farm State page."));
+            return;
+        }
+        if (available >= cost.max()) {
+            constraints.add(new ConstraintResult("BUDGET", "FEASIBLE",
+                    "Costs about " + rupees(cost.min(), cost.max()) + part + "; your budget is Rs " + num(available) + "."));
+        } else if (available >= cost.min()) {
+            constraints.add(new ConstraintResult("BUDGET", "FEASIBLE",
+                    "Costs about " + rupees(cost.min(), cost.max()) + part + ". Your Rs " + num(available)
+                            + " covers the cheaper choice."));
+        } else {
+            constraints.add(new ConstraintResult("BUDGET", "INFEASIBLE",
+                    "Not enough budget. Costs at least Rs " + num(cost.min()) + part + "; you have Rs " + num(available) + "."));
+        }
+    }
+
+    private static String rupees(double min, double max) {
+        return min == max ? "Rs " + num(min) : "Rs " + num(min) + " to " + num(max);
+    }
+
+    private static String num(double v) {
+        if (v == Math.rint(v)) {
+            return String.format(Locale.ROOT, "%,d", (long) v);
+        }
+        return String.format(Locale.ROOT, "%,.1f", v);
     }
 
     private boolean isValidRequirement(Double value) {

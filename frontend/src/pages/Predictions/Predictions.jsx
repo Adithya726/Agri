@@ -269,7 +269,7 @@ function Predictions() {
         `${(probability * 100).toFixed(2)}%`;
 
     const riskStatus = (
-        riskResult?.overallStatus || "UNKNOWN"
+        riskResult?.overallStatus || "NEEDS_DATA"
     ).toLowerCase();
 
     return (
@@ -677,7 +677,7 @@ function Predictions() {
 </h3>
                                                         <span
                                                             className={`risk-severity risk-severity-${(
-                                                                risk.severity || "unknown"
+                                                                risk.severity || "needs_data"
                                                             ).toLowerCase()}`}
                                                         >
                                                             {t(
