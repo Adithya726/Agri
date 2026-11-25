@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
     Plus,
@@ -14,12 +14,121 @@ import PageState from "../../components/PageState/PageState";
 import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import useFarmerFarms from "../../hooks/useFarmerFarms";
+import { getSeasonPlan } from "../../services/actionPlanService";
+import { DueLine, DUE_KEYS, Requirements } from "../../components/SeasonPlan/SeasonPlan";
 import {
     getAllAgriculturalActions,
     addAgriculturalAction,
 } from "../../services/agriculturalActionService";
 
 import "./AgriculturalActions.css";
+
+const num = (value, digits = 1) =>
+    Number(value).toLocaleString("en-IN", { maximumFractionDigits: digits });
+
+const range = (min, max, digits = 1) =>
+    min === max || max == null ? num(min, digits) : `${num(min, digits)} – ${num(max, digits)}`;
+
+/*
+ * What each step means for the selected farm, read from the farm's
+ * season plan (which the backend re-decides from the latest Farm State):
+ * the stage it belongs to (done / now / later), today's decision for
+ * current-stage steps, its due date and its sourced needs for the
+ * farm's area.
+ */
+const farmViewOf = (plan) => {
+    const view = new Map();
+    if (!plan) {
+        return view;
+    }
+    (plan.stages || []).forEach((stage) => {
+        (stage.steps || []).forEach((step) => {
+            view.set(step.actionId, {
+                stage: stage.stage,
+                stageStatus: stage.status,
+                completed: step.completed,
+                due: step.due,
+                requirements: step.requirements
+            });
+        });
+    });
+    [...(plan.doNow || []), ...(plan.onHold || [])].forEach((step) => {
+        const entry = view.get(step.actionId) || {};
+        view.set(step.actionId, {
+            ...entry,
+            decision: step.decision,
+            order: step.order,
+            onHold: (plan.onHold || []).includes(step),
+            due: step.due || entry.due,
+            requirements: step.requirements || entry.requirements
+        });
+    });
+    return view;
+};
+
+function FarmFit({ view, t }) {
+    if (!view) {
+        return <span className="farm-fit farm-fit-other">{t("fitOtherCrop")}</span>;
+    }
+    let label;
+    let kind;
+    if (view.completed) {
+        label = t("fitDone");
+        kind = "done";
+    } else if (view.decision) {
+        label = view.onHold ? `${t("fitOnHold")}: ${view.decision}` : `${t("fitDoNow")} #${view.order}`;
+        kind = view.onHold ? "hold" : "now";
+    } else if (view.stageStatus === "DONE") {
+        label = t("fitEarlierStage");
+        kind = "past";
+    } else {
+        label = `${t("fitLaterStage")} (${view.stage})`;
+        kind = "later";
+    }
+    return (
+        <div className="farm-fit-cell">
+            <span className={`farm-fit farm-fit-${kind}`}>{label}</span>
+            {view.due?.from && !view.completed && (
+                <small className="farm-fit-due">
+                    {t(DUE_KEYS[view.due.status])}: {view.due.from}
+                    {view.due.to && view.due.to !== view.due.from ? ` → ${view.due.to}` : ""}
+                </small>
+            )}
+        </div>
+    );
+}
+
+function FarmNeeds({ req, t }) {
+    const [open, setOpen] = useState(false);
+    if (!req) {
+        return <small className="action-plan-muted">{t("reqNotSourced")}</small>;
+    }
+    const cost = req.cost || {};
+    const labour = req.labour || {};
+    const water = req.water || {};
+    return (
+        <div className="farm-needs">
+            <small>
+                {t("reqCost")}: {cost.max > 0 ? `₹${range(cost.min, cost.max, 0)}` : t("reqNotSourced")}
+                <br />
+                {t("reqWorkers")}: {labour.sourced
+                    ? `${range(labour.personDaysMin, labour.personDaysMax)} ${t("reqPersonDays")}`
+                    : t("reqNotSourced")}
+                <br />
+                {t("reqWater")}: {!water.sourced
+                    ? t("reqNotSourced")
+                    : water.includedIn
+                        ? t("reqCountedInShort")
+                        : `${range(water.m3Min, water.m3Max)} m³${water.label ? ` (${water.label})` : ""}`}
+            </small>
+            <button type="button" className="farm-needs-toggle" onClick={() => setOpen((v) => !v)}>
+                {open ? t("reqHideDetails") : t("reqShowDetails")}
+            </button>
+            {open && <Requirements req={req} t={t} />}
+        </div>
+    );
+}
 
 const INITIAL_FORM = {
     actionName: "",
@@ -48,6 +157,50 @@ function AgriculturalActions() {
     const [saving, setSaving] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({ ...INITIAL_FORM });
+
+    // The farm whose Farm State the table is read against.
+    const { farms, selectedFarmId, setSelectedFarmId } = useFarmerFarms(farmer?.userId);
+    const [seasonPlan, setSeasonPlan] = useState(null);
+    const [loadingFarmView, setLoadingFarmView] = useState(false);
+    const [onlyThisFarm, setOnlyThisFarm] = useState(true);
+
+    const loadFarmView = async (farmId) => {
+        if (!farmId) {
+            setSeasonPlan(null);
+            return;
+        }
+        try {
+            setLoadingFarmView(true);
+            setSeasonPlan(await getSeasonPlan(farmId));
+        } catch (error) {
+            console.error("Failed to load the farm's plan:", error);
+            setSeasonPlan(null);
+            toast.error(t("seasonPlanLoadFailed"));
+        } finally {
+            setLoadingFarmView(false);
+        }
+    };
+
+    useEffect(() => {
+        loadFarmView(selectedFarmId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedFarmId]);
+
+    const farmView = useMemo(() => farmViewOf(seasonPlan), [seasonPlan]);
+
+    const farmCrop = seasonPlan?.crop ? String(seasonPlan.crop).toLowerCase() : null;
+
+    const shownActions = useMemo(() => {
+        if (!seasonPlan || !onlyThisFarm || !farmCrop) {
+            return actions;
+        }
+        return actions.filter((a) => String(a.applicableCrop || "").toLowerCase() === farmCrop);
+    }, [actions, seasonPlan, onlyThisFarm, farmCrop]);
+
+    const refreshAll = () => {
+        loadActions();
+        loadFarmView(selectedFarmId);
+    };
 
     useEffect(() => {
         loadActions();
@@ -209,12 +362,12 @@ function AgriculturalActions() {
                                 <button
                                     type="button"
                                     className="secondary-action-button"
-                                    onClick={loadActions}
-                                    disabled={loading}
+                                    onClick={refreshAll}
+                                    disabled={loading || loadingFarmView}
                                 >
                                     <RefreshCw
                                         size={17}
-                                        className={loading ? "spin" : ""}
+                                        className={loading || loadingFarmView ? "spin" : ""}
                                     />
                                     {t("refresh")}
                                 </button>
@@ -559,7 +712,48 @@ function AgriculturalActions() {
                                     message={t("loadErrorHint")}
                                     onRetry={loadActions}
                                 />
-                            ) : actions.length === 0 ? (
+                            ) : null}
+
+                            {!loading && !loadFailed && farms.length > 0 && (
+                                <div className="farm-view-bar">
+                                    <label htmlFor="actions-farm">{t("actionsForFarm")}</label>
+                                    <select
+                                        id="actions-farm"
+                                        value={selectedFarmId}
+                                        onChange={(event) => setSelectedFarmId(event.target.value)}
+                                    >
+                                        {farms.map((farm) => (
+                                            <option key={farm.id} value={farm.id}>
+                                                {farm.farmName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <label className="farm-view-only">
+                                        <input
+                                            type="checkbox"
+                                            checked={onlyThisFarm}
+                                            onChange={(event) => setOnlyThisFarm(event.target.checked)}
+                                        />
+                                        {t("actionsOnlyThisCrop")}
+                                    </label>
+                                    {seasonPlan && (
+                                        <span className="farm-view-summary">
+                                            {seasonPlan.crop || t("cropNotSet")}
+                                            {seasonPlan.growthStage ? ` · ${seasonPlan.growthStage}` : ""}
+                                            {seasonPlan.cropDays?.daysAfterTransplanting != null
+                                                ? ` · ${t("dayAfterTransplanting").replace("{day}", seasonPlan.cropDays.daysAfterTransplanting)}`
+                                                : seasonPlan.cropDays?.daysAfterSowing != null
+                                                    ? ` · ${t("dayAfterSowing").replace("{day}", seasonPlan.cropDays.daysAfterSowing)}`
+                                                    : ""}
+                                        </span>
+                                    )}
+                                    {seasonPlan?.headline && (
+                                        <p className="farm-view-headline">{seasonPlan.headline}</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {loading || loadFailed ? null : shownActions.length === 0 ? (
                                 <div className="empty-state">
                                     <BookOpen size={35} />
                                     <p>{t("noAgriculturalActions")}</p>
@@ -573,15 +767,21 @@ function AgriculturalActions() {
                                                 <th>{t("actionCategory")}</th>
                                                 <th>{t("applicableCrop")}</th>
                                                 <th>{t("applicableGrowthStage")}</th>
-                                                <th>Resource requirements</th>
+                                                {seasonPlan && <th>{t("actionsForThisFarm")}</th>}
+                                                <th>{seasonPlan ? t("actionsNeedsForFarm") : t("actionsResourceRequirements")}</th>
                                                 <th>{t("evidenceStatus")}</th>
                                                 <th>{t("status")}</th>
                                             </tr>
                                         </thead>
 
                                         <tbody>
-                                            {actions.map((action) => (
-                                                <tr key={action.id}>
+                                            {shownActions.map((action) => {
+                                                const view = farmView.get(action.id);
+                                                return (
+                                                <tr
+                                                    key={action.id}
+                                                    className={view?.decision && !view.onHold ? "farm-row-now" : ""}
+                                                >
                                                     <td>
                                                         <div className="action-name-cell">
                                                             <strong>
@@ -608,6 +808,20 @@ function AgriculturalActions() {
                                                         {action.applicableGrowthStage || "—"}
                                                     </td>
 
+                                                    {seasonPlan && (
+                                                        <td>
+                                                            <FarmFit view={view} t={t} />
+                                                            {view?.due && !view.completed && view.stageStatus !== "DONE" && (
+                                                                <DueLine due={view.due} t={t} />
+                                                            )}
+                                                        </td>
+                                                    )}
+
+                                                    {seasonPlan ? (
+                                                    <td>
+                                                        <FarmNeeds req={view?.requirements} t={t} />
+                                                    </td>
+                                                    ) : (
                                                     <td>
                                                         <small>
                                                             Water:{" "}
@@ -629,6 +843,7 @@ function AgriculturalActions() {
                                                             )}
                                                         </small>
                                                     </td>
+                                                    )}
 
                                                     <td>
                                                         <span className="evidence-badge">
@@ -650,7 +865,8 @@ function AgriculturalActions() {
                                                         </span>
                                                     </td>
                                                 </tr>
-                                            ))}
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>
