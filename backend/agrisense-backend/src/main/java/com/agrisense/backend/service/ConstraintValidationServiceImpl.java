@@ -83,10 +83,30 @@ public class ConstraintValidationServiceImpl
                     "Agricultural action not found.");
         }
 
+        return evaluate(farm.getId(), farmState, action);
+    }
+
+    /*
+     * Validate an action against a farm state that is not saved
+     * (what-if analysis). Same checks as validateAction.
+     */
+    @Override
+    public ConstraintValidationResponse validateAction(
+            Long farmId, FarmState farmState, AgriculturalAction action) {
+
+        if (farmState == null || action == null) {
+            return failureResponse(farmId, "Farm state and action are required.");
+        }
+        return evaluate(farmId, farmState, action);
+    }
+
+    private ConstraintValidationResponse evaluate(
+            Long farmId, FarmState farmState, AgriculturalAction action) {
+
         // 5. Do not validate inactive actions.
         if (!Boolean.TRUE.equals(action.getActive())) {
             return failureResponse(
-                    farm.getId(),
+                    farmId,
                     "This agricultural action is inactive and cannot be validated.");
         }
 
@@ -117,7 +137,7 @@ public class ConstraintValidationServiceImpl
         return new ConstraintValidationResponse(
                 true,
                 message,
-                farm.getId(),
+                farmId,
                 action.getActionName(),
                 overallStatus,
                 constraints);

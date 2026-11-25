@@ -14,6 +14,9 @@ import AgriculturalActions from "./pages/AgriculturalActions/AgriculturalActions
 import Monitoring from "./pages/Monitoring/Monitoring";
 import ActionPlan from "./pages/ActionPlan/ActionPlan";
 import DecisionEngine from "./pages/DecisionEngine/DecisionEngine";
+import History from "./pages/History/History";
+import WhatIf from "./pages/WhatIf/WhatIf";
+import Assistant from "./pages/Assistant/Assistant";
 
 function ProtectedRoute({ children }) {
 
@@ -205,6 +208,34 @@ function App() {
     element={
         <ProtectedRoute>
             <Monitoring />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="/history"
+    element={
+        <ProtectedRoute>
+            <History />
+        </ProtectedRoute>
+    }
+/>
+
+
+<Route
+    path="/what-if"
+    element={
+        <ProtectedRoute>
+            <WhatIf />
+        </ProtectedRoute>
+    }
+/>
+
+
+<Route
+    path="/assistant"
+    element={
+        <ProtectedRoute>
+            <Assistant />
         </ProtectedRoute>
     }
 />

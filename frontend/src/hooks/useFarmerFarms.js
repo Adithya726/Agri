@@ -1,0 +1,83 @@
+import { useEffect, useState } from "react";
+
+import { getFarmsByFarmerId } from "../services/farmService";
+
+// The signed-in farmer's farms, with the first one selected.
+export default function useFarmerFarms(farmerId, onError) {
+
+    const [farms, setFarms] = useState([]);
+    const [selectedFarmId, setSelectedFarmId] = useState("");
+    const [loadingFarms, setLoadingFarms] = useState(true);
+
+    useEffect(() => {
+
+        let cancelled = false;
+
+        const load = async () => {
+
+            if (!farmerId) {
+                setFarms([]);
+                setSelectedFarmId("");
+                setLoadingFarms(false);
+                return;
+            }
+
+            try {
+                setLoadingFarms(true);
+                const data = (await getFarmsByFarmerId(farmerId)) || [];
+                if (!cancelled) {
+                    setFarms(data);
+                    setSelectedFarmId(data.length > 0 ? String(data[0].id) : "");
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    setFarms([]);
+                    setSelectedFarmId("");
+                    onError?.(error);
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoadingFarms(false);
+                }
+            }
+        };
+
+        load();
+
+        return () => {
+            cancelled = true;
+        };
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [farmerId]);
+
+    return { farms, selectedFarmId, setSelectedFarmId, loadingFarms };
+}
+
+export const errorMessage = (error, fallback) => {
+
+    const data = error?.response?.data;
+
+    if (typeof data === "string" && data.trim()) {
+        return data;
+    }
+
+    const fieldErrors = data?.errors ? Object.values(data.errors) : [];
+
+    if (fieldErrors.length > 0) {
+        return fieldErrors.join(" ");
+    }
+
+    return data?.message || fallback;
+};
+
+export const formatDateTime = (value) => {
+
+    if (!value) {
+        return "—";
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+};

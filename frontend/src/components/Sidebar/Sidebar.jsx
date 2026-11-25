@@ -225,6 +225,20 @@ function Sidebar() {
                     <span>{t("whatIfAnalysis")}</span>
                 </NavLink>
 
+
+                {/* Farm Assistant */}
+                <NavLink
+                    to="/assistant"
+                    className={({ isActive }) =>
+                        `sidebar-link ${
+                            isActive ? "active" : ""
+                        }`
+                    }
+                >
+                    <span className="sidebar-icon">💬</span>
+                    <span>{t("farmAssistant")}</span>
+                </NavLink>
+
             </nav>
 
 

@@ -1,0 +1,80 @@
+.assistant-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.assistant-form input {
+    flex: 1 1 220px;
+    min-width: 0;
+    padding: 11px 13px;
+    border: 1px solid #cfd8cf;
+    border-radius: 10px;
+    font: inherit;
+}
+
+.assistant-label {
+    margin: 16px 0 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.assistant-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.assistant-chip {
+    border: 1px solid #a5d6a7;
+    background: #f1f8f1;
+    color: #1b5e20;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.assistant-chip:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.assistant-question {
+    font-weight: 700;
+    margin: 0 0 8px;
+    overflow-wrap: anywhere;
+}
+
+.assistant-text {
+    margin: 10px 0 6px;
+    overflow-wrap: anywhere;
+}
+
+.assistant-not-covered {
+    border-left: 4px solid #ef6c00;
+}
+
+.assistant-badge-warn {
+    margin-left: 8px;
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.assistant-sources {
+    font-size: 0.85rem;
+    color: #5f6b5f;
+    margin: 6px 0 0;
+}
+
+.assistant-answer .whatif-list {
+    margin: 6px 0 12px;
+    padding-left: 20px;
+}
+
+.assistant-answer .whatif-list li {
+    margin: 4px 0;
+    overflow-wrap: anywhere;
+}

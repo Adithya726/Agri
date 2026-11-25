@@ -65,6 +65,18 @@ public class CropRecommendationServiceImpl
             );
         }
 
+        return recommendCrop(farmId, farmState);
+    }
+
+    // Recommendation from the values of a farm state that is not saved (what-if analysis).
+    @Override
+    public CropRecommendationResponse recommendCrop(Long farmId, FarmState farmState) {
+
+        if (farmState == null) {
+            return new CropRecommendationResponse(
+                    false, "Farm state not found", farmId, null, List.of());
+        }
+
         if (farmState.getNitrogen() == null
                 || farmState.getPhosphorus() == null
                 || farmState.getPotassium() == null

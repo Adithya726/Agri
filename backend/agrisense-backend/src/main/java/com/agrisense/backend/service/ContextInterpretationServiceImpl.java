@@ -62,6 +62,25 @@ public class ContextInterpretationServiceImpl
 
                         new ResourceNotFoundException("Farm state not found"));
 
+        return interpret(farm, farmState, farm.getCrop(), farm.getGrowthStage());
+
+    }
+
+    /*
+     * Same rules on a farm state that is not saved (what-if analysis).
+     * The crop and growth stage reported are the ones in that state.
+     */
+    @Override
+    public ContextInterpretationResponse interpretFarmContext(
+            Farm farm, FarmState farmState) {
+
+        return interpret(farm, farmState, farmState.getCrop(), farmState.getGrowthStage());
+
+    }
+
+    private ContextInterpretationResponse interpret(
+            Farm farm, FarmState farmState, String crop, String growthStage) {
+
         List<ContextItem> context = new ArrayList<>();
 
         // =========================
@@ -268,9 +287,9 @@ public class ContextInterpretationServiceImpl
 
                 farm.getId(),
 
-                farm.getCrop(),
+                crop,
 
-                farm.getGrowthStage(),
+                growthStage,
 
                 context
 

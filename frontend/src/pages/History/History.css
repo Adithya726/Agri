@@ -1,0 +1,130 @@
+.history-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.history-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-width: 150px;
+    flex: 1 1 150px;
+}
+
+.history-filters select,
+.history-filters input {
+    padding: 10px 12px;
+    border: 1px solid #cfd8cf;
+    border-radius: 10px;
+    font: inherit;
+    background: #fff;
+}
+
+.history-filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.history-button {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    background: #2e7d32;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.history-button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.history-button-ghost {
+    background: transparent;
+    color: #2e7d32;
+    border: 1px solid #2e7d32;
+}
+
+.history-ml-note {
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #fff8e1;
+    color: #6d5200;
+    font-size: 0.9rem;
+}
+
+.history-count {
+    margin-top: 0;
+}
+
+.history-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 18px;
+    border-left: 2px solid #dfe7df;
+}
+
+.history-event {
+    position: relative;
+    padding: 12px 0 12px 16px;
+}
+
+.history-event::before {
+    content: "";
+    position: absolute;
+    left: -25px;
+    top: 18px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #9e9e9e;
+}
+
+.history-state::before { background: #1976d2; }
+.history-plan::before { background: #6a1b9a; }
+.history-action::before { background: #2e7d32; }
+
+.history-event-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #5f6b5f;
+}
+
+.history-badge {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #eef3ee;
+    font-weight: 600;
+    color: #2f3b2f;
+}
+
+.history-event h4 {
+    margin: 6px 0 4px;
+    overflow-wrap: anywhere;
+}
+
+.history-event p {
+    margin: 4px 0;
+    overflow-wrap: anywhere;
+}
+
+.history-note {
+    background: #f5f7f5;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.history-changes {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-size: 0.9rem;
+}

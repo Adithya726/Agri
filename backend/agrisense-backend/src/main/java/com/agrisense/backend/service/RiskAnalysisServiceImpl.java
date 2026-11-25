@@ -27,6 +27,20 @@ public class RiskAnalysisServiceImpl implements RiskAnalysisService {
 
         ContextInterpretationResponse contextResponse =
                 contextInterpretationService.interpretFarmContext(farmId);
+        return fromContext(farmId, contextResponse);
+    }
+
+    // Risk analysis of a farm state that is not saved (what-if analysis).
+    @Override
+    public RiskAnalysisResponse analyzeFarmRisks(
+            com.agrisense.backend.model.Farm farm,
+            com.agrisense.backend.model.FarmState farmState) {
+        return fromContext(farm.getId(),
+                contextInterpretationService.interpretFarmContext(farm, farmState));
+    }
+
+    private RiskAnalysisResponse fromContext(
+            Long farmId, ContextInterpretationResponse contextResponse) {
 
         List<RiskFinding> risks = new ArrayList<>();
 

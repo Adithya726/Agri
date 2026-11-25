@@ -1,0 +1,98 @@
+.whatif-form h2 {
+    margin-top: 0;
+}
+
+.whatif-group {
+    border: 1px solid #dfe7df;
+    border-radius: 12px;
+    margin: 14px 0;
+    padding: 10px 14px 14px;
+}
+
+.whatif-group legend {
+    font-weight: 700;
+    padding: 0 6px;
+}
+
+.whatif-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.whatif-fields label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.whatif-fields input,
+.whatif-fields select {
+    padding: 9px 11px;
+    border: 1px solid #cfd8cf;
+    border-radius: 10px;
+    font: inherit;
+    min-width: 0;
+}
+
+.whatif-compare {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.whatif-column {
+    min-width: 0;
+}
+
+.whatif-column h3 {
+    margin-top: 0;
+}
+
+.whatif-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 14px;
+    margin: 0 0 12px;
+}
+
+.whatif-summary dt {
+    font-size: 0.8rem;
+    color: #5f6b5f;
+}
+
+.whatif-summary dd {
+    margin: 2px 0 0;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.whatif-risk-high { color: #c62828; }
+.whatif-risk-medium { color: #ef6c00; }
+.whatif-risk-low { color: #2e7d32; }
+
+.whatif-list {
+    margin: 6px 0 12px;
+    padding-left: 20px;
+}
+
+.whatif-list li {
+    margin: 4px 0;
+    overflow-wrap: anywhere;
+}
+
+.whatif-decision {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #eceff1;
+}
+
+.whatif-recommended { background: #e8f5e9; color: #1b5e20; }
+.whatif-deferred { background: #fff3e0; color: #e65100; }
+.whatif-needs_data { background: #e3f2fd; color: #0d47a1; }
+.whatif-rejected { background: #ffebee; color: #b71c1c; }
